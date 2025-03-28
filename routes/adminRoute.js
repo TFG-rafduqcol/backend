@@ -1,0 +1,38 @@
+const express = require('express');
+const { getAllUsers, deleteUser } = require('../controllers/adminController'); 
+const authenticateToken = require('../middlewares/authMiddleware');
+const router = express.Router();
+
+router.get('/getAllUsers', authenticateToken, getAllUsers);
+
+/**
+ * @swagger
+ * /api/admin/deleteUser/{userId}:
+ *   delete:
+ *     tags:
+ *       - Admin
+ *     summary: Delete a user
+ *     description: Deletes a user by their ID. Only accessible by administrators.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: ID of the user to be deleted.
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: User successfully deleted.
+ *       403:
+ *         description: You do not have permission to delete this user.
+ *       404:
+ *         description: User not found.
+ *       500:
+ *         description: Internal server error.
+ */
+
+router.delete('/deleteUser/:userId', authenticateToken, deleteUser);
+
+module.exports = router;
