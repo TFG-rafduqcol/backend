@@ -1,5 +1,5 @@
 const express = require('express');
-const { getAllUsers, deleteUser } = require('../controllers/adminController'); 
+const { getAllUsers, registerUser, deleteUser } = require('../controllers/adminController'); 
 const authenticateToken = require('../middlewares/authMiddleware');
 const router = express.Router();
 
@@ -32,6 +32,9 @@ router.get('/getAllUsers', authenticateToken, getAllUsers);
  *       500:
  *         description: Internal server error.
  */
+
+
+router.post('/register', authenticateToken, registerUser);
 
 router.delete('/deleteUser/:userId', authenticateToken, deleteUser);
 

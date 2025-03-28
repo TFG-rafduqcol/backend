@@ -13,6 +13,8 @@ const authenticateToken = (req, res, next) => {
         }
         
         const userId = decoded.id; 
+        const isAdmin = decoded.isAdmin;
+        req.isAdmin = isAdmin;
         req.userId = userId;
         
         next(); 

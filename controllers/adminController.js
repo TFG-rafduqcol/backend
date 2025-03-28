@@ -43,6 +43,52 @@ const getAllUsers = async (req, res) => {
         });
     }
 };
+
+
+// Register a new user
+const registerUser = async (req, res) => {
+
+    try {
+
+      const { firstName, lastName, username, email, role, password } = req.body;
+
+      console.log("holaaaaa", req.isAdmin);
+      console.log("holaaaaa", role);
+
+
+      const isAdmin = req.isAdmin ? role : 0;
+      
+      const newUser = await User.create({
+        firstName,
+        lastName,
+        username,
+        email,
+        password, 
+        isAdmin, 
+        avatarId: 1,
+        rangeId: 1,
+      });
+  
+      res.status(201).json(newUser);
+    } catch (error) {
+      if ((error.name === "SequelizeUniqueConstraintError" && error.errors[0].path.includes("email")) ||
+        (error.code === "ER_DUP_ENTRY" && error.sqlState === "23000")) {
+        return res.status(400).json({
+          error: "EmailDuplicate",
+          message: "This email is already in use."
+        });
+      }
+  
+      console.error("Error registering user:", error);
+      res.status(500).json({
+        error: "ServerError",
+        message: "An error occurred while registering the user."
+      });
+    }
+  };
+  
+
+
 const deleteUser = async (req, res) => {
     try {
         const loggedUserId = req.userId;
@@ -102,4 +148,4 @@ const deleteUser = async (req, res) => {
 };
 
 
-module.exports = { getAllUsers, deleteUser };
+module.exports = { getAllUsers, deleteUser, registerUser };

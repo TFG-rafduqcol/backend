@@ -36,11 +36,10 @@ const checkEmail = async (req, res) => {
 };
 
 // Register a new user
-const registerUser = async (req, res) => {
+const registerPlayer = async (req, res) => {
   try {
     const { firstName, lastName, username, email, password } = req.body;
     
-    const role = (req.user && req.user.isAdmin) ? role : "user";
 
   
     const newUser = await User.create({
@@ -48,7 +47,10 @@ const registerUser = async (req, res) => {
       lastName,
       username,
       email,
-      password  
+      password, 
+      isAdmin: false, 
+      avatarId: 1,
+      rangeId: 1,
     });
 
     res.status(201).json(newUser);
@@ -111,7 +113,8 @@ const loginUser = async (req, res) => {
       const payload = {
           id: user.id,
           username: user.username,
-          email: user.email
+          email: user.email,
+          isAdmin: user.isAdmin ? 1 : 0
       };
       const token = jwt.sign(payload, process.env.JWT_SECRET); 
 
@@ -249,4 +252,4 @@ const updateUser = async (req, res) => {
 }
 
 
-module.exports = { checkEmail, registerUser, loginUser, updateUser };
+module.exports = { checkEmail, registerPlayer, loginUser, updateUser };
