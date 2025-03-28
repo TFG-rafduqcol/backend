@@ -49,7 +49,7 @@ const registerPlayer = async (req, res) => {
       email,
       password, 
       isAdmin: false, 
-      avatarId: 1,
+      activeAvatarId: 1,
       rangeId: 1,
     });
 

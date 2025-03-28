@@ -51,11 +51,6 @@ const registerUser = async (req, res) => {
     try {
 
       const { firstName, lastName, username, email, role, password } = req.body;
-
-      console.log("holaaaaa", req.isAdmin);
-      console.log("holaaaaa", role);
-
-
       const isAdmin = req.isAdmin ? role : 0;
       
       const newUser = await User.create({
@@ -65,7 +60,7 @@ const registerUser = async (req, res) => {
         email,
         password, 
         isAdmin, 
-        avatarId: 1,
+        activeAvatarId: 1,
         rangeId: 1,
       });
   
