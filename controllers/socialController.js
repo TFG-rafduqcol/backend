@@ -82,6 +82,45 @@ const getUserByUsernameOrId = async (req, res) => {
 };
 
 
+const getUserById = async(req, res) => {
+
+  const { userId } = req.params;
+
+  try {
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const user = await User.findByPk(userId, {
+      include: [
+        { model: Avatar, as: 'active_avatar', attributes: ['image_url'] },
+        { model: Range, as: 'range', attributes: ['name', 'image_url'] }
+      ]
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      player: {
+        id: user.id,
+        username: user.username,
+        avatar: user.active_avatar?.image_url || null,
+        level: user.level,
+        range: user.range?.name || null,
+        range_url: user.range?.image_url || null,
+        experience: user.experience,
+      }
+    });
+  } catch (error) {
+      console.error("Error getting user:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+
+      
+
 
 // Returns the friends of a user by user ID
 const getMyFriends = async (req, res) => {
@@ -295,4 +334,4 @@ const removeFriend = async (req, res) => {
 
 
 
-module.exports = { getUserByUsernameOrId, getMyFriends, getMyFriendRequests, sendFriendRequest, changeFriendRequestStatus, removeFriend }; 
+module.exports = { getUserByUsernameOrId, getUserById, getMyFriends, getMyFriendRequests, sendFriendRequest, changeFriendRequestStatus, removeFriend }; 

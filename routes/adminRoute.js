@@ -1,7 +1,9 @@
 const express = require('express');
-const { getAllUsers, registerUser, deleteUser } = require('../controllers/adminController'); 
+const { isAdmin, getAllUsers, registerUser, deleteUser } = require('../controllers/adminController'); 
 const authenticateToken = require('../middlewares/authMiddleware');
 const router = express.Router();
+
+router.get('/isAdmin', authenticateToken, isAdmin);
 
 router.get('/getAllUsers', authenticateToken, getAllUsers);
 

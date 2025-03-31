@@ -41,7 +41,6 @@ const registerPlayer = async (req, res) => {
     const { firstName, lastName, username, email, password } = req.body;
     
 
-  
     const newUser = await User.create({
       firstName,
       lastName,
@@ -135,7 +134,7 @@ const loginUser = async (req, res) => {
               gold: user.gold,
               gems: user.gems,
               isAdmin: user.isAdmin
-          }
+          }, 
       });
   } catch (error) {
       console.error("Error during login:", error);

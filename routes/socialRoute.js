@@ -1,5 +1,5 @@
 const express = require('express');
-const { getUserByUsernameOrId, getMyFriends, getMyFriendRequests, sendFriendRequest, changeFriendRequestStatus, removeFriend } = require('../controllers/socialController');
+const { getUserByUsernameOrId, getUserById, getMyFriends, getMyFriendRequests, sendFriendRequest, changeFriendRequestStatus, removeFriend } = require('../controllers/socialController');
 const authenticateToken = require("../middlewares/authMiddleware");
 
 
@@ -30,7 +30,38 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
+
 router.get('/getUserByUsernameOrId/:usernameOrId', authenticateToken, getUserByUsernameOrId);
+
+/**
+ * @swagger
+ * /api/social/getUserById/{userId}:
+ *   get:
+ *     tags:
+ *       - Social
+ *     summary: Get user by ID
+ *     description: Fetch a user using their ID
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         description: The ID of the user
+ *         schema:
+ *           type: string
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User found
+ *       401: 
+ *         description: Unauthorized access - Token missing or invalid
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/getUserById/:userId', authenticateToken, getUserById);
+
 
 /**
  * @swagger

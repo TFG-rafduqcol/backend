@@ -3,6 +3,22 @@ const FriendShip = require("../models/friendship");
 const Game = require("../models/game");
 const { Op } = require("sequelize");
 
+
+const isAdmin = async (req, res, next) => {
+    try {
+        const userId = req.userId; 
+        const user = await User.findByPk(userId);
+        const isAdmin = user ? Boolean(user.isAdmin) : false;
+        return res.status(200).json({ isAdmin });
+    } catch (error) {
+        console.error("Error checking admin status:", error);
+        return res.status(500).json({
+            error: "ServerError",
+            message: "An error occurred while checking admin status.",
+        });
+    }
+};
+        
 const getAllUsers = async (req, res) => {
 
     try {
@@ -143,4 +159,4 @@ const deleteUser = async (req, res) => {
 };
 
 
-module.exports = { getAllUsers, deleteUser, registerUser };
+module.exports = { isAdmin, getAllUsers, deleteUser, registerUser };
