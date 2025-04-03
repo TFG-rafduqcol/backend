@@ -1,3 +1,4 @@
+const sequelize = require('../models/index').sequelize;
 const User = require('../models/user');
 const Avatar = require('../models/avatar');
 const bcrypt = require('bcryptjs'); 
@@ -7,8 +8,8 @@ const Range = require('../models/range');
 require('dotenv').config();
 
 
-// Check if the email is already registered
 const checkEmail = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { email } = req.body;
 
@@ -17,43 +18,49 @@ const checkEmail = async (req, res) => {
     }
 
     const user = await User.findOne({
-      where: { email }
+      where: { email },
+      transaction 
     });
 
     if (user) {
+      await transaction.commit(); 
       return res.status(200).json({
         exists: true,
         message: "Email already registered!"
       });
     }
 
+    await transaction.commit(); 
     return res.status(200).json({ exists: false });
   } catch (error) {
+    await transaction.rollback(); 
     console.error("Error checking email:", error);
     return res.status(500).json({ message: "Internal server error" });
   }
-
 };
 
-// Register a new user
 const registerPlayer = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { firstName, lastName, username, email, password } = req.body;
-    
 
     const newUser = await User.create({
       firstName,
       lastName,
       username,
       email,
-      password, 
-      isAdmin: false, 
+      password,
+      isAdmin: false,
       activeAvatarId: 1,
       rangeId: 1,
-    });
+    }, { transaction }); 
+
+    await transaction.commit();
 
     res.status(201).json(newUser);
   } catch (error) {
+    await transaction.rollback();
+
     if ((error.name === "SequelizeUniqueConstraintError" && error.errors[0].path.includes("email")) ||
       (error.code === "ER_DUP_ENTRY" && error.sqlState === "23000")) {
       return res.status(400).json({
@@ -73,6 +80,7 @@ const registerPlayer = async (req, res) => {
 
 // Login a user that is already registered
 const loginUser = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
       const { email, password } = req.body;
 
@@ -89,9 +97,9 @@ const loginUser = async (req, res) => {
             as: 'range',
             attributes: ['name', 'image_url']
           }
-        ]
+        ],
+        transaction
       });
-
 
       if (!user) {
           return res.status(404).json({
@@ -117,6 +125,8 @@ const loginUser = async (req, res) => {
       };
       const token = jwt.sign(payload, process.env.JWT_SECRET); 
 
+      await transaction.commit();
+
       res.status(200).json({
           message: "Login successful",
           token: token, 
@@ -137,6 +147,7 @@ const loginUser = async (req, res) => {
           }, 
       });
   } catch (error) {
+      await transaction.rollback();
       console.error("Error during login:", error);
       res.status(500).json({
           error: "ServerError",
@@ -147,20 +158,20 @@ const loginUser = async (req, res) => {
 
 // Update user information
 const updateUser = async (req, res) => {  
+  const transaction = await sequelize.transaction();
   try {
-
       const loggedUserId = req.userId;
 
-      const loggedUser = await User.findByPk(loggedUserId);
+      const loggedUser = await User.findByPk(loggedUserId, { transaction });
 
       let id;
 
       if (loggedUser.isAdmin) {
         id = req.params.id;
-      } else{
+      } else {
         id = loggedUserId;
       }
-    
+
       let { firstName, lastName, username, email, password} = req.body;
 
       const user = await User.findByPk(id, {
@@ -175,10 +186,10 @@ const updateUser = async (req, res) => {
             as: 'range',
             attributes: ['name', 'image_url']
           }
-        ]
+        ],
+        transaction
       });
 
-      
       if (!user) {
           return res.status(404).json({
               error: "UserNotFound",
@@ -187,16 +198,15 @@ const updateUser = async (req, res) => {
       }
 
       if (email && email !== user.email) {
-        const existingUser = await User.findOne({ where: { email: email } });
+        const existingUser = await User.findOne({ where: { email: email }, transaction });
         
         if (existingUser) {
             return res.status(400).json({
               error: "EmailAlreadyExists",
               message: "Email is already in use by another user."
           });
-        
         }
-    }
+      }
 
       if(password && password !== "") {
           const salt = await bcrypt.genSalt(10);
@@ -212,8 +222,8 @@ const updateUser = async (req, res) => {
           username,
           email,
           password: user.password,
-      });
-      
+      }, { transaction });
+
       const payload = {
         id: user.id,
         username: user.username,
@@ -221,6 +231,8 @@ const updateUser = async (req, res) => {
       };
       
       const token = jwt.sign(payload, process.env.JWT_SECRET); 
+
+      await transaction.commit();
       
       res.status(200).json({
         message: "User updated successfully",
@@ -238,10 +250,10 @@ const updateUser = async (req, res) => {
           level: user.level,
           gold: user.gold,
           gems: user.gems
-          }
         }
-      );
+      });
   } catch (error) {
+      await transaction.rollback();
       console.error("Error updating user:", error);
       res.status(500).json({
           error: "ServerError",
