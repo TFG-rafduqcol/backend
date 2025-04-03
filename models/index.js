@@ -43,8 +43,15 @@ Tower.belongsTo(Projectile, {
   
 );
 
-Upgrade.hasMany(Tower);
-Tower.belongsTo(Upgrade);
+Upgrade.hasOne(Tower, {
+  foreignKey: 'upgradeId',
+  as: 'tower'
+});
+
+Tower.belongsTo(Upgrade, {
+  foreignKey: 'upgradeId',
+  as: 'upgrade'
+});
 
 
 User.belongsTo(Range, {

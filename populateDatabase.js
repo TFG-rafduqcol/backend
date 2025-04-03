@@ -199,9 +199,9 @@ const projectilesData = [
     { id: 3, name: 'bomb', damage: 25, speed: 4, stroke: 'MAGIC', avatarId: 3 },
 ];
 const towersData = [
-    { id: 1, name: 'canon', cost: 100, fire_rate: 1, range: 0.4, position: 1, gameId: 1, projectileId: 1 },
-    { id: 2, name: 'canon', cost: 125, fire_rate: 0.8, range: 0.5, position: 5, gameId: 2, projectileId: 2 },
-    { id: 3, name: 'mortar', cost: 150, fire_rate: 0.3, range: 0.6, position: 6, gameId: 2, projectileId: 3 },
+    { id: 1, name: 'canon', damage: 10, cost: 100, fire_rate: 1, range: 0.4, position: 1, gameId: 1, projectileId: 1 },
+    { id: 2, name: 'canon', damage: 12, cost: 125, fire_rate: 0.8, range: 0.5, position: 5, gameId: 2, projectileId: 2 },
+    { id: 3, name: 'mortar', damage: 15, cost: 150, fire_rate: 0.3, range: 0.6, position: 6, gameId: 2, projectileId: 3 },
 ];
 
  

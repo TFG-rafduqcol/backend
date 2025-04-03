@@ -135,8 +135,6 @@ router.post('/login', loginUser);
  *       - Auth
  *     summary: Update user information
  *     description: Allows a user to update their information (email, password, etc.) using their user ID.
- *     security:
- *      - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

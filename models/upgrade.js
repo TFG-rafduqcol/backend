@@ -19,8 +19,8 @@ const Upgrade = sequelize.define("Upgrade", {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
-            min: 1,
-            max: 999,
+            min: 0,
+            max: 99,
         },
     },
     damage_boost: {
@@ -32,6 +32,14 @@ const Upgrade = sequelize.define("Upgrade", {
         },
     },
     range_boost: {
+        type: DataTypes.DOUBLE,
+        allowNull: false,
+        validate: {
+            min: 0,
+            max: 1,
+        },
+    },
+    fire_rate_boost: {
         type: DataTypes.DOUBLE,
         allowNull: false,
         validate: {

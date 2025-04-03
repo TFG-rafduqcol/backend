@@ -15,8 +15,6 @@ router.get('/getAllUsers', authenticateToken, getAllUsers);
  *       - Admin
  *     summary: Delete a user
  *     description: Deletes a user by their ID. Only accessible by administrators.
- *     security:
- *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId

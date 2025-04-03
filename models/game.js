@@ -22,6 +22,15 @@ const Game = sequelize.define("Game", {
         allowNull: false,
         defaultValue: 1,
     },
+    gold: {
+        type: DataTypes.INTEGER,
+        defaultValue: 500,
+        validate: {
+          min: 0,
+          max: 1000000,
+        },
+      },
+
 }   , {
     timestamps: true, 
     tableName: 'games', 

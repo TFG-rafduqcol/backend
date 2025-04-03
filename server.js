@@ -45,6 +45,9 @@ app.use('/api/avatars/', avatarRoutes);
 const gameRoutes = require('./routes/gameRoute');
 app.use('/api/games/', gameRoutes);
 
+const towerRoutes = require('./routes/towerRoute');
+app.use('/api/towers/', towerRoutes);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 

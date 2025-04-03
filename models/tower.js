@@ -25,12 +25,20 @@ const Tower = sequelize.define("Tower", {
     avatar: {
         type: DataTypes.JSON,
     },
+    damage: {
+        type: DataTypes.DOUBLE,
+        allowNull: false,
+        validate: {
+            min: 1,
+            max: 99,
+        },
+    },
     fire_rate: {
         type: DataTypes.DOUBLE,
         allowNull: false,
         validate: {
             min: 0,
-            max: 1,
+            max: 10,
         },
     },
     range: {
@@ -38,7 +46,7 @@ const Tower = sequelize.define("Tower", {
         allowNull: false,
         validate: {
             min: 0,
-            max: 1,
+            max: 10,
         },
     }, 
     position: {

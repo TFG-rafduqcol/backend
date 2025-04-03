@@ -57,14 +57,6 @@ const User = sequelize.define( "User",
         max: 31700,
       },
     },
-    gold: {
-      type: DataTypes.INTEGER,
-      defaultValue: 0,
-      validate: {
-        min: 0,
-        max: 1000000,
-      },
-    },
     gems: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
