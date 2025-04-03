@@ -12,6 +12,8 @@ const router = express.Router();
  *       - Auth
  *     summary: Check if an email is already registered
  *     description: Verifies if the provided email is already registered in the system.
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -41,6 +43,8 @@ router.post('/checkEmail', checkEmail);
  *       - Auth
  *     summary: Register a new user
  *     description: Registers a new user with the provided information (first name, last name, email, password, etc.).
+ *     security:
+ *      - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -90,6 +94,8 @@ router.post('/register', registerPlayer);
  *       - Auth
  *     summary: User login
  *     description: Logs in a user using their credentials (email and password).
+ *     security:
+ *      - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -129,6 +135,8 @@ router.post('/login', loginUser);
  *       - Auth
  *     summary: Update user information
  *     description: Allows a user to update their information (email, password, etc.) using their user ID.
+ *     security:
+ *      - BearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -42,11 +42,16 @@ app.use('/api/social/', socialRoutes);
 const avatarRoutes = require('./routes/avatarRoute');
 app.use('/api/avatars/', avatarRoutes);
 
+const gameRoutes = require('./routes/gameRoute');
+app.use('/api/games/', gameRoutes);
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 
 const imageRoutes = require('./routes/imageRoute');
 app.use('/api/images/', imageRoutes);
+
+
 
 app.get('/', (req, res) => {
     res.send('Servidor corriendo');

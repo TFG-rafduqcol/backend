@@ -1,5 +1,5 @@
 const User = require('../models/user');
-const FriendShip = require('../models/friendship');
+const FriendShip = require('../models/friendShip');
 const Avatar = require('../models/avatar');
 const Range = require('../models/range');
 const { Op } = require('sequelize');

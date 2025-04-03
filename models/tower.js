@@ -10,7 +10,6 @@ const Tower = sequelize.define("Tower", {
     name: {
         type: DataTypes.STRING(50),
         allowNull: false,
-        unique: true,
         validate: {
             len: [3, 50],
         },
@@ -31,17 +30,25 @@ const Tower = sequelize.define("Tower", {
         allowNull: false,
         validate: {
             min: 0,
-            max: 10,
+            max: 1,
         },
     },
     range: {
         type: DataTypes.DOUBLE,
         allowNull: false,
         validate: {
-            min: 1,
-            max: 100,
+            min: 0,
+            max: 1,
         },
-    }
+    }, 
+    position: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        validate: {
+            min: 1,
+            max: 8,
+        },
+    },
 }, {
     timestamps: false,
     tableName: "towers",

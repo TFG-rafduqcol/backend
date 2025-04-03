@@ -3,18 +3,8 @@ const FriendShips = require('./models/friendShip');
 const User = require('./models/user');
 const Avatar = require('./models/avatar');
 const Range = require('./models/range');
-const gamesData = [
-    { map: 'map', path: 'path' },
-    { map: 'map', path: 'path' },
-    { map: 'map', path: 'path' },
-    { map: 'map', path: 'path' },
-    { map: 'map', path: 'path' },
-    { map: 'map', path: 'path' },
-    { map: 'map', path: 'path' },
-    { map: 'map', path: 'path' },
-
-];
-
+const Tower = require('./models/tower');
+const Projectile = require('./models/projectile');
 
 const Avatars = [
     { id: 1, image_url: 'http://192.168.100.7:8000/www/images/avatars/avatar_1.jpeg' },
@@ -28,14 +18,6 @@ const Avatars = [
     { id: 9, image_url: 'http://192.168.100.7:8000/www/images/avatars/avatar_9.png' },
     { id: 10, image_url: 'http://192.168.100.7:8000/www/images/avatars/avatar_10.png' },
     { id: 11, image_url: 'http://192.168.100.7:8000/www/images/avatars/avatar_11.png' },
-
-
-
-
-
-
-
-
 ];
 
 const Ranges = [
@@ -171,6 +153,12 @@ const usersData = [
     },
 ];
 
+const gamesData = [
+    { id: 1, map: 'http://192.168.100.7:8000/www/images/MapaAzteka.png', path: 'path', round: 1, UserId: 1 },
+    { id: 2, map: 'http://192.168.100.7:8000/www/images/MapaAzteka.png', path: 'path', round: 1, UserId: 2 },
+];
+
+
 const friendshipsData = [
     { user1Id: 1, user2Id: 2, status: 'pending' },
     { user1Id: 1, user2Id: 3, status: 'accepted' },
@@ -196,11 +184,6 @@ const UserAvatars = [
     { userId: 1, avatarId: 10 },
     { userId: 1, avatarId: 11 },
 
-
-
-
-
-
     { userId: 2, avatarId: 1 },
     { userId: 3, avatarId: 2 },
     { userId: 4, avatarId: 3 },
@@ -210,19 +193,28 @@ const UserAvatars = [
     { userId: 8, avatarId: 2 },
 ];
 
+const projectilesData = [
+    { id: 1, name: 'bullet', damage: 15, speed: 6, stroke: 'ICE', avatarId: 1 },
+    { id: 2, name: 'magic_ball', damage: 20, speed: 8, stroke: 'FIRE', avatarId: 2 },
+    { id: 3, name: 'bomb', damage: 25, speed: 4, stroke: 'MAGIC', avatarId: 3 },
+];
+const towersData = [
+    { id: 1, name: 'canon', cost: 100, fire_rate: 1, range: 0.4, position: 1, gameId: 1, projectileId: 1 },
+    { id: 2, name: 'canon', cost: 125, fire_rate: 0.8, range: 0.5, position: 5, gameId: 2, projectileId: 2 },
+    { id: 3, name: 'mortar', cost: 150, fire_rate: 0.3, range: 0.6, position: 6, gameId: 2, projectileId: 3 },
+];
+
+ 
+
 
 
 const populateDatabase = async () => {
     try {
-        // Create the games
-        const games = await Game.bulkCreate(gamesData, { returning: true });
-        console.log('Games created:', games.length);
-
+       
         // Create the ranges
         const ranges = await Range.bulkCreate(Ranges, { returning: true });
         console.log('Ranges created:', ranges.length);
 
-        
         //Cretae the avatars
         const avatars = await Avatar.bulkCreate(Avatars, { returning: true });
         console.log('Avatars created:', avatars.length);
@@ -231,9 +223,21 @@ const populateDatabase = async () => {
         const users = await User.bulkCreate(usersData, { returning: true });
         console.log('Users created:', users.length);
 
+         // Create the games
+         const games = await Game.bulkCreate(gamesData, { returning: true });
+         console.log('Games created:', games.length); 
+
         // Create the friendships between users
         const friendships = await FriendShips.bulkCreate(friendshipsData, { returning: true });
         console.log('Friendships created:', friendships.length);
+
+        // Create the projectiles
+        const projectiles = await Projectile.bulkCreate(projectilesData, { returning: true });
+        console.log('Projectiles created:', projectiles.length);
+
+        // Create the towers
+        const towers = await Tower.bulkCreate(towersData, { returning: true });
+        console.log('Towers created:', towers.length);
 
         // Assign the avatars to the users
         for (let i = 0; i < UserAvatars.length; i++) {

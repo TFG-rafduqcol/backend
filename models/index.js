@@ -22,11 +22,26 @@ Wave.belongsToMany(Enemy, { through: 'WaveEnemies' });
 Enemy.belongsToMany(Wave, { through: 'WaveEnemies' });
 
 
-Game.belongsToMany(Tower, { through: 'GameTowers' });
-Tower.belongsToMany(Game, { through: 'GameTowers' });
+Game.hasMany(Tower, {
+  as: 'towers',  
+  foreignKey: 'gameId' 
+});
 
-Projectile.hasMany(Tower);
-Tower.belongsTo(Projectile);
+Tower.belongsTo(Game, {
+  as: 'game',  
+  foreignKey: 'gameId'
+});
+
+Projectile.hasMany(Tower, {
+  foreignKey: 'projectileId',
+  as: 'towers'
+});
+Tower.belongsTo(Projectile, {
+  foreignKey: 'projectileId',
+  as: 'projectile'
+}
+  
+);
 
 Upgrade.hasMany(Tower);
 Tower.belongsTo(Upgrade);
