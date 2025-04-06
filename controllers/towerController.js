@@ -9,6 +9,7 @@ const Upgrade = require('../models/upgrade');
 const deployTower = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
+
         const loggedInUserId = req.userId;
         const { gameId, name, position } = req.body;
         
@@ -39,11 +40,12 @@ const deployTower = async (req, res) => {
         }
 
         const towerProperties = {
-            canon: { cost: 100, damage: 10, fire_rate: 3, range: 4, projectile_type: 'bullet' },
-            magic: { cost: 125,  damage: 12, fire_rate: 2.5, range: 5, projectile_type: 'magic_ball' },
-            mortar: { cost: 150,  damage: 15, fire_rate: 4, range: 6, projectile_type: 'bomb' },
+            canon: { cost: 100, damage: 10, fire_rate: 3, range: 40, projectile_type: 'bullet' },
+            magic: { cost: 125,  damage: 12, fire_rate: 2.5, range: 50, projectile_type: 'magic_ball' },
+            mortar: { cost: 150,  damage: 15, fire_rate: 4, range: 60, projectile_type: 'bomb' },
+            archer: { cost: 120,  damage: 15, fire_rate: 4, range: 60, projectile_type: 'arrow' },
         };
-
+        
         if (!towerProperties[name]) {
             await transaction.rollback();
             return res.status(400).json({ error: 'Invalid tower name' });
@@ -71,6 +73,8 @@ const deployTower = async (req, res) => {
             canon: { cost: 100, damage_boost: 0.01, range_boost: 0.015, fire_rate_boost: 0.015 },
             magic: { cost: 125, damage_boost: 0.02, range_boost: 0.01, fire_rate_boost: 0.01 },
             mortar: { cost: 150, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
+            archer: { cost: 120, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
+
         };
 
         const newUpgrade = await Upgrade.create({
@@ -82,7 +86,6 @@ const deployTower = async (req, res) => {
         }, { transaction });
 
         const { damage, fire_rate, cost, range } = towerProperties[name];
-        console.log(damage)
         const newTower = await Tower.create({
             gameId,
             name,
