@@ -26,7 +26,7 @@ const authenticateToken = require('../middlewares/authMiddleware');
  *               name:
  *                 type: string
  *                 description: The name of the tower to be deployed. 
- *                 example: "canon"
+ *                 example: "stoenCannon"
  *               position:
  *                 type: integer
  *                 description: The position on the map where the tower will be deployed.
@@ -52,7 +52,7 @@ const authenticateToken = require('../middlewares/authMiddleware');
  *                     name:
  *                       type: string
  *                       description: The name of the tower.
- *                       example: "canon"
+ *                       example: "stoenCannon"
  *                     cost:
  *                       type: integer
  *                       description: The cost of the tower.
@@ -147,7 +147,7 @@ router.post('/deployTower', authenticateToken, deployTower);
  *                     name:
  *                       type: string
  *                       description: The name of the tower.
- *                       example: "canon"
+ *                       example: "stoneCannon"
  *                     cost:
  *                       type: integer
  *                       description: The new cost of the tower after upgrade.

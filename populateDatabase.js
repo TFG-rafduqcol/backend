@@ -194,14 +194,15 @@ const UserAvatars = [
 ];
 
 const projectilesData = [
-    { id: 1, name: 'bullet', damage: 15, speed: 6, stroke: 'ICE', avatarId: 1 },
-    { id: 2, name: 'magic_ball', damage: 20, speed: 8, stroke: 'FIRE', avatarId: 2 },
-    { id: 3, name: 'bomb', damage: 25, speed: 4, stroke: 'MAGIC', avatarId: 3 },
+    { id: 1, name: 'stone', speed: 6, stroke: 'ICE', avatarId: 1 },
+    { id: 2, name: 'iron', speed: 8, stroke: 'FIRE', avatarId: 2 },
+    { id: 3, name: 'fire', speed: 4, stroke: 'MAGIC', avatarId: 3 },
+    { id: 4, name: 'rock',  speed: 4, stroke: 'MAGIC', avatarId: 3 },
 ];
 const towersData = [
-    { id: 1, name: 'canon', damage: 10, cost: 100, fire_rate: 1, range: 0.4, position: 1, gameId: 1, projectileId: 1 },
-    { id: 2, name: 'canon', damage: 12, cost: 125, fire_rate: 0.8, range: 0.5, position: 5, gameId: 2, projectileId: 2 },
-    { id: 3, name: 'mortar', damage: 15, cost: 150, fire_rate: 0.3, range: 0.6, position: 6, gameId: 2, projectileId: 3 },
+    { id: 1, name: 'stoneCannon', damage: 10, cost: 100, fire_rate: 3, range: 0.4, position: 1, gameId: 1, projectileId: 1 },
+    { id: 2, name: 'ironCannon', damage: 12, cost: 125, fire_rate: 0.8, range: 0.5, position: 5, gameId: 2, projectileId: 2 },
+    { id: 3, name: 'inferno', damage: 15, cost: 150, fire_rate: 0.3, range: 0.6, position: 6, gameId: 2, projectileId: 3 },
 ];
 
  

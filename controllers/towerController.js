@@ -40,11 +40,12 @@ const deployTower = async (req, res) => {
         }
 
         const towerProperties = {
-            canon: { cost: 100, damage: 10, fire_rate: 3, range: 40, projectile_type: 'bullet' },
-            magic: { cost: 125,  damage: 12, fire_rate: 2.5, range: 50, projectile_type: 'magic_ball' },
-            mortar: { cost: 150,  damage: 15, fire_rate: 4, range: 60, projectile_type: 'bomb' },
-            archer: { cost: 120,  damage: 15, fire_rate: 4, range: 60, projectile_type: 'arrow' },
+            stoneCannon: { cost: 100, damage: 10, fire_rate: 3, range: 40, projectile_type: 'stone' },
+            ironCannon: { cost: 125,  damage: 12, fire_rate: 2.5, range: 50, projectile_type: 'iron' },
+            inferno: { cost: 150,  damage: 15, fire_rate: 4, range: 60, projectile_type: 'fire' },
+            mortar: { cost: 120,  damage: 15, fire_rate: 4, range: 70, projectile_type: 'rock' },
         };
+        
         
         if (!towerProperties[name]) {
             await transaction.rollback();
@@ -70,10 +71,10 @@ const deployTower = async (req, res) => {
         }
 
         const upgrades = {
-            canon: { cost: 100, damage_boost: 0.01, range_boost: 0.015, fire_rate_boost: 0.015 },
-            magic: { cost: 125, damage_boost: 0.02, range_boost: 0.01, fire_rate_boost: 0.01 },
-            mortar: { cost: 150, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
-            archer: { cost: 120, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
+            stoneCannon: { cost: 100, damage_boost: 0.01, range_boost: 0.015, fire_rate_boost: 0.015 },
+            ironCannon: { cost: 125, damage_boost: 0.02, range_boost: 0.01, fire_rate_boost: 0.01 },
+            inferno: { cost: 150, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
+            mortar: { cost: 120, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
 
         };
 

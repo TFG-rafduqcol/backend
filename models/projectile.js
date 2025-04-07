@@ -16,14 +16,6 @@ const Projectile = sequelize.define("Projectile", {
             len: [3, 50],
         },
     },
-    damage: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        validate: {
-            min: 1,
-            max: 999,
-        },
-    },
     speed: {
         type: DataTypes.DOUBLE,
         allowNull: false,
