@@ -21,4 +21,23 @@ const createGame = async (req, res) => {
     }
   };
 
-module.exports = { createGame };
+
+const getGameById = async (req, res) => {
+    const { gameId } = req.params;
+    try {
+        const game = await Game.findOne({ where: { id: gameId } });
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+
+        if (game.UserId !== req.userId) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+        res.status(200).json(game);
+    } catch (error) {
+        console.error("Error fetching game:", error);
+        res.status(500).json({ error: 'Failed to fetch game' });
+    }
+};
+
+module.exports = { createGame, getGameById };
