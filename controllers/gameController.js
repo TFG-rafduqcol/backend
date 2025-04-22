@@ -40,4 +40,33 @@ const getGameById = async (req, res) => {
     }
 };
 
-module.exports = { createGame, getGameById };
+
+const updateGame = async (req, res) => {
+    const { gameId } = req.params;
+    const { round, gold, lives } = req.body;
+    console.log("Update game request:", round, gold, lives);
+
+    try {
+        const game = await Game.findOne({ where: { id: gameId } });
+        if (!game) {
+            return res.status(404).json({ error: 'Game not found' });
+        }
+
+        if (game.UserId !== req.userId) {
+            return res.status(403).json({ error: 'Forbidden' });
+        }
+
+        if (round !== undefined) game.round = round;
+        if (gold !== undefined) game.gold = gold;
+        if (lives !== undefined) game.lives = lives;
+
+        await game.save();
+        res.status(200).json(game);
+    } catch (error) {
+        console.error("Error updating game:", error);
+        res.status(500).json({ error: 'Failed to update game' });
+    }
+};
+
+
+module.exports = { createGame, getGameById, updateGame };

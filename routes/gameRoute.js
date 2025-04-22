@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createGame, getGameById} = require('../controllers/gameController');
+const { createGame, getGameById, updateGame} = require('../controllers/gameController');
 const authenticateToken = require('../middlewares/authMiddleware');
 
 
@@ -102,5 +102,78 @@ router.post('/createGame', authenticateToken, createGame);
  */
 
 router.get('/getGame/:gameId', authenticateToken, getGameById);
+
+/**
+ * @swagger
+ * /api/games/updateGame/{gameId}:
+ *   put:
+ *     tags:
+ *       - Game
+ *     summary: Update a game's round, gold, and lives by ID
+ *     description: Updates the round, gold, and lives of a specific game session. The session must belong to the authenticated user.
+ *     parameters:
+ *       - in: path
+ *         name: gameId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the game session to update.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - round
+ *               - gold
+ *               - lives
+ *             properties:
+ *               round:
+ *                 type: integer
+ *                 example: 5
+ *               gold:
+ *                 type: number
+ *                 example: 150.5
+ *               lives:
+ *                 type: integer
+ *                 example: 3
+ *     responses:
+ *       200:
+ *         description: Game updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: string
+ *                   example: "65c9b7a34d1a6e0023e6f7c5"
+ *                 map:
+ *                   type: string
+ *                   example: "DesertArena"
+ *                 round:
+ *                   type: integer
+ *                   example: 5
+ *                 gold:
+ *                   type: number
+ *                   example: 150.5
+ *                 lives:
+ *                   type: integer
+ *                   example: 3
+ *                 userId:
+ *                   type: string
+ *                   example: "user123"
+ *       403:
+ *         description: Forbidden – the game does not belong to the authenticated user
+ *       404:
+ *         description: Game not found
+ *       401:
+ *         description: Unauthorized – token missing or invalid
+ *       500:
+ *         description: Internal server error
+ */
+
+router.put('/updateGame/:gameId', authenticateToken, updateGame);
 
 module.exports = router;

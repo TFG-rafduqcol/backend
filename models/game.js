@@ -30,6 +30,14 @@ const Game = sequelize.define("Game", {
           max: 1000000,
         },
       },
+    lives: {
+        type: DataTypes.INTEGER,
+        defaultValue: 20,
+        validate: {
+          min: 0,
+          max: 20,
+        },
+      },
 
 }   , {
     timestamps: true, 
