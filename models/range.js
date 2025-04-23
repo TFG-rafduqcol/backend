@@ -18,7 +18,7 @@ const Range = sequelize.define(
         },
         image_url: {
             type: DataTypes.STRING,
-            defaultValue: "http://192.168.100.7:8000/www/images/master.png"
+            defaultValue: "http://127.0.0.1:8000/www/images/master.png"
         },
     },
     {

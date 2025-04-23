@@ -73,7 +73,7 @@ sequelize.drop()
     .then(() => {
         const PORT = 3000;
         app.listen(PORT, () => {
-            console.log(`🚀 Servidor corriendo en http://192.168.100.7:${PORT}`);
+            console.log(`🚀 Servidor corriendo en http://127.0.0.1:${PORT}`);
             console.log('Swagger UI available at: http://localhost:3000/api-docs');
         });
     })

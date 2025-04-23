@@ -44,7 +44,6 @@ const getGameById = async (req, res) => {
 const updateGame = async (req, res) => {
     const { gameId } = req.params;
     const { round, gold, lives } = req.body;
-    console.log("Update game request:", round, gold, lives);
 
     try {
         const game = await Game.findOne({ where: { id: gameId } });
