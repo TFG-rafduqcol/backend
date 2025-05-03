@@ -72,10 +72,6 @@ router.post('/checkEmail', checkEmail);
  *                 type: string
  *                 description: User's password
  *                 example: "securePassword123"
- *               confirmPassword:
- *                 type: string
- *                 description: Confirm the user's password
- *                 example: "securePassword123"
  *     responses:
  *       201:
  *         description: User successfully registered
@@ -168,10 +164,6 @@ router.post('/login', loginUser);
  *               password:
  *                 type: string
  *                 description: New password for the user
- *                 example: "newSecurePassword"
- *               confirmPassword:
- *                 type: string
- *                 description: Confirm the new password
  *                 example: "newSecurePassword"
  *     responses:
  *       200:

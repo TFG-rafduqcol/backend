@@ -60,23 +60,27 @@ app.get('/', (req, res) => {
     res.send('Servidor corriendo');
 });
 
-sequelize.drop() 
-    .then(() => {
-        return sequelize.sync({ alter: true }); 
-    })
-    .then(() => {
-        console.log("✅ Database synchronized and tables recreated");
+if (require.main === module) {
+    sequelize.drop() 
+        .then(() => {
+            return sequelize.sync({ alter: true }); 
+        })
+        .then(() => {
+            console.log("✅ Database synchronized and tables recreated");
 
 
-        return populateDatabase();
-    })
-    .then(() => {
-        const PORT = 3000;
-        app.listen(PORT, () => {
-            console.log(`🚀 Servidor corriendo en http://127.0.0.1:${PORT}`);
-            console.log('Swagger UI available at: http://localhost:3000/api-docs');
+            return populateDatabase();
+        })
+        .then(() => {
+            const PORT = 3000;
+            app.listen(PORT, () => {
+                console.log(`🚀 Servidor corriendo en http://127.0.0.1:${PORT}`);
+                console.log('Swagger UI available at: http://localhost:3000/api-docs');
+            });
+        })
+        .catch(err => {
+            console.error("❌ Error syncing or populating the database:", err);
         });
-    })
-    .catch(err => {
-        console.error("❌ Error syncing or populating the database:", err);
-    });
+}
+
+module.exports = app;

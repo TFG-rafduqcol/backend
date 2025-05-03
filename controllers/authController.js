@@ -14,6 +14,7 @@ const checkEmail = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
+      await transaction.rollback();
       return res.status(400).json({ message: "Email is required" });
     }
 
@@ -43,6 +44,14 @@ const registerPlayer = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
     const { firstName, lastName, username, email, password } = req.body;
+    
+    if (!firstName || !lastName || !username || !email || !password) {
+      await transaction.rollback();
+      return res.status(400).json({
+        error: "ValidationError",
+        message: "Email, password, username, email and password are required.",
+      });
+    }
 
     const newUser = await User.create({
       firstName,
@@ -60,15 +69,13 @@ const registerPlayer = async (req, res) => {
     res.status(201).json(newUser);
   } catch (error) {
     await transaction.rollback();
-
     if ((error.name === "SequelizeUniqueConstraintError" && error.errors[0].path.includes("email")) ||
       (error.code === "ER_DUP_ENTRY" && error.sqlState === "23000")) {
-      return res.status(400).json({
-        error: "EmailDuplicate",
-        message: "This email is already in use."
-      });
-    }
-
+        return res.status(400).json({
+          error: "EmailDuplicate",
+          message: "This email is already in use."
+        });
+      }
     console.error("Error registering user:", error);
     res.status(500).json({
       error: "ServerError",
@@ -83,6 +90,14 @@ const loginUser = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
       const { email, password } = req.body;
+
+      if (!email || !password) {
+          await transaction.rollback();
+          return res.status(400).json({ 
+              error: "ValidationError",
+              message: "Email and password are required."
+          });
+      }
 
       const user = await User.findOne({
         where: { email },
@@ -102,6 +117,7 @@ const loginUser = async (req, res) => {
       });
 
       if (!user) {
+          await transaction.rollback();
           return res.status(404).json({
               error: "EmailNotFound",
               message: "Email not register."
@@ -111,9 +127,10 @@ const loginUser = async (req, res) => {
       const isPasswordValid = await bcrypt.compare(password, user.password); 
 
       if (!isPasswordValid) {
+          await transaction.rollback();
           return res.status(401).json({
               error: "InvalidPassword",
-              message: "Incorrect password."
+              message: "Invalid password."
           });
       }
 
@@ -161,9 +178,7 @@ const updateUser = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
       const loggedUserId = req.userId;
-
       const loggedUser = await User.findByPk(loggedUserId, { transaction });
-
       let id;
 
       if (loggedUser.isAdmin) {
@@ -173,6 +188,14 @@ const updateUser = async (req, res) => {
       }
 
       let { firstName, lastName, username, email, password} = req.body;
+
+      if (!firstName || !lastName || !username || !email) {
+          await transaction.rollback();
+          return res.status(400).json({
+              error: "ValidationError",
+              message: "First name, last name, username, email and password are required."
+          });
+      }
 
       const user = await User.findByPk(id, {
         include: [
@@ -191,6 +214,7 @@ const updateUser = async (req, res) => {
       });
 
       if (!user) {
+          await transaction.rollback();
           return res.status(404).json({
               error: "UserNotFound",
               message: "User not found."
@@ -201,6 +225,7 @@ const updateUser = async (req, res) => {
         const existingUser = await User.findOne({ where: { email: email }, transaction });
         
         if (existingUser) {
+            await transaction.rollback();
             return res.status(400).json({
               error: "EmailAlreadyExists",
               message: "Email is already in use by another user."
@@ -221,7 +246,7 @@ const updateUser = async (req, res) => {
           lastName,
           username,
           email,
-          password: user.password,
+          password: password,
       }, { transaction });
 
       const payload = {
