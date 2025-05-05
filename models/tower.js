@@ -46,7 +46,7 @@ const Tower = sequelize.define("Tower", {
         allowNull: false,
         validate: {
             min: 0,
-            max: 100,
+            max: 999,
         },
     }, 
     position: {
