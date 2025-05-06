@@ -4,9 +4,11 @@ const Tower = require('../models/tower');
 const Projectile = require('../models/projectile');
 const Enemy = require('../models/enemy');
 
-
 const generateHorde = async (req, res) => {
   const { gameId } = req.params;
+  const enemyCount = 3;
+  const spacingTime = 1.5; // segundos entre enemigos
+  const enemySpeed = 30; // píxeles por segundo
 
   if (!gameId) return res.status(400).json({ error: 'Missing gameId' });
 
@@ -24,20 +26,22 @@ const generateHorde = async (req, res) => {
   ];
 
   const towerPositions = [
-    { position: 1, x: 230, y: 645 },
-    { position: 2, x: 325, y: 420 },
-    { position: 3, x: 165, y: 390 },
-    { position: 4, x: 262, y: 132 },
-    { position: 5, x: 582, y: 132 },
-    { position: 6, x: 647, y: 260 },
-    { position: 7, x: 870, y: 70 },
+    { position: 1, x: 255, y: 670 },
+    { position: 2, x: 350, y: 445 },
+    { position: 3, x: 190, y: 415 },
+    { position: 4, x: 287, y: 157 },
+    { position: 5, x: 607, y: 157 },
+    { position: 6, x: 672, y: 285 },
+    { position: 7, x: 895, y: 95 }
   ];
 
+
+
   try {
-    const towers = await Tower.findAll({ where: { gameId } });
+    const towersData = await Tower.findAll({ where: { gameId } });
 
     const towerZones = towerPositions.map(tower => {
-      const towerData = towers.find(t => t.position === tower.position);
+      const towerData = towersData.find(t => t.position === tower.position);
       if (!towerData) return null;
 
       return {
@@ -47,55 +51,88 @@ const generateHorde = async (req, res) => {
         y: tower.y,
         range: towerData.range,
         damage: towerData.damage,
-        fire_rate: towerData.fire_rate,
-        dps: towerData.damage / towerData.fire_rate
+        fire_rate: towerData.fire_rate
       };
     }).filter(Boolean);
 
-    const fullPath = interpolatePath(rawPath);
+    const fullPath = interpolatePath(rawPath); // Camino con interpolación
 
-    const coverageByTower = towerZones.map(tower => {
-      let pixelsCovered = 0;
+    const enemies = [];
+    for (let e = 0; e < enemyCount; e++) {
+      const spawnTime = e * spacingTime;
+      enemies.push({
+        id: e + 1,
+        spawnTime,
+        speed: enemySpeed,
+        health: 0,
+        hits: {}
+      });
+    }
 
-      for (const cell of fullPath) {
-        const distance = Math.hypot(tower.x - cell.x, tower.y - cell.y);
-        if (distance <= tower.range) {
-          pixelsCovered++;
+    // Simulación de disparos
+    for (const tower of towerZones) {
+      const maxSimTime = (fullPath.length / enemySpeed) + (enemyCount * spacingTime);
+      let nextFireTime = 0; // Tiempo en el que la torre puede volver a disparar
+      const timeStep = 0.1; // Intervalo de tiempo para la simulación
+    
+      for (let t = 0; t <= maxSimTime; t += timeStep) {
+        if (t < nextFireTime) continue; // Aún no puede disparar
+    
+        const target = enemies.find(enemy => {
+          if (enemy.spawnTime > t) return false;
+    
+          const timeOnPath = t - enemy.spawnTime;
+          if (timeOnPath < 0) return false;
+    
+          const distance = timeOnPath * enemy.speed;
+          if (distance >= fullPath.length) return false;
+    
+          const index = Math.min(Math.ceil(distance), fullPath.length - 1);
+          const point = fullPath[index];         
+           const distToTower = Math.hypot(point.x - tower.x, point.y - tower.y);
+    
+          if (distToTower <= tower.range) {
+            console.log(`Enemigo a ${distToTower.toFixed(2)} px de la torre ${tower.position} en el tiempo ${t}`);
+            return true;
+          }
+          return false;
+        });
+    
+        if (target) {
+          if (!target.hits[tower.position]) {
+            target.hits[tower.position] = 0;
+          }
+          target.hits[tower.position] += 1;
+          tower.targetId = target.id;
+    
+          nextFireTime = t + tower.fire_rate; // Actualiza el tiempo del siguiente disparo
+        }
+      }
+    }
+    
+
+    for (const enemy of enemies) {
+      let totalDamage = 0;
+
+      // Sumar el daño de todas las torres que dispararon al enemigo
+      for (const [towerPosition, impactCount] of Object.entries(enemy.hits)) {
+        const tower = towerZones.find(t => t.position == towerPosition);
+        if (tower) {
+          totalDamage += impactCount * tower.damage;
         }
       }
 
-      return {
-        position: tower.position,
-        name: tower.name,
-        pixelsCovered,
-        dps: tower.dps,
-        fire_rate: tower.fire_rate,
-        damage: tower.damage,
-      };
-    });
-
-    const totalPixelsCovered = coverageByTower.reduce((sum, t) => sum + t.pixelsCovered, 0);
-
-    const enemySpeed = 30; 
-    let totalDamage = 0;
-
-    for (const tower of coverageByTower) {
-      const timeInRange = tower.pixelsCovered / enemySpeed;
-      const towerImpacts = Math.ceil(timeInRange / tower.fire_rate);
-      const damage =  towerImpacts * tower.damage;
-      totalDamage += damage;
+      // La vida final del enemigo es suficiente para que sobreviva al último golpe
+      enemy.health = totalDamage + 1; // +1 para que sobreviva justo el último impacto
     }
 
-    const enemyHealth = Math.ceil(totalDamage + 1);
+    // Mostrar los impactos de cada enemigo
+    console.log('Enemy hits:', enemies.map(enemy => ({ id: enemy.id, hits: enemy.hits })));
 
     return res.json({
-      totalPathPixels: fullPath.length,
-      coverageByTower,
-      totalPixelsCovered,
-      enemy: {
-        speed: enemySpeed,
-        health: enemyHealth
-      }
+      pathPixels: fullPath.length,
+      towers: towerZones,
+      enemies
     });
 
   } catch (error) {
@@ -103,6 +140,9 @@ const generateHorde = async (req, res) => {
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+
+
 
 
 
