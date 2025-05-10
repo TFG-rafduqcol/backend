@@ -41,9 +41,9 @@ const deployTower = async (req, res) => {
 
         const towerProperties = {
             stoneCannon: { cost: 90, damage: 10, fire_rate: 1.5, range: 90, projectile_type: 'stone' },
-            ironCannon: { cost: 125,  damage: 12, fire_rate: 2, range: 80, projectile_type: 'iron' },
-            inferno: { cost: 150,  damage: 13, fire_rate: 3, range: 80, projectile_type: 'fire' },
-            mortar: { cost: 120,  damage: 14.5, fire_rate: 4, range: 95, projectile_type: 'rock' },
+            ironCannon: { cost: 100,  damage: 12, fire_rate: 2, range: 80, projectile_type: 'iron' },
+            inferno: { cost: 125,  damage: 13, fire_rate: 3, range: 80, projectile_type: 'fire' },
+            mortar: { cost: 150,  damage: 14.5, fire_rate: 4, range: 95, projectile_type: 'rock' },
         };
         
         

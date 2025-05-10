@@ -42,17 +42,17 @@ const Enemy = sequelize.define(
                 max: 10,
             },
         },
-        resistance: {
-            type: DataTypes.ENUM(...STROKE_TYPES),
-            allowNull: false,
-        },
-        damage_reduction: {
-            type: DataTypes.DOUBLE,
+        lifes : {
+            type: DataTypes.INTEGER,
             allowNull: false,
             validate: {
-                min: 0,
-                max: 1,
+                min: 1,
+                max: 999,
             },
+        },
+        resistance: {
+            type: DataTypes.ENUM(...STROKE_TYPES),
+            allowNull: true,
         },
         avatar: {
             type: DataTypes.JSON,

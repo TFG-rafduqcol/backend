@@ -5,6 +5,7 @@ const Avatar = require('./models/avatar');
 const Range = require('./models/range');
 const Tower = require('./models/tower');
 const Projectile = require('./models/projectile');
+const Enemy = require('./models/enemy');
 
 const Avatars = [
     { id: 1, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_1.jpeg' },
@@ -205,6 +206,20 @@ const towersData = [
     { id: 3, name: 'inferno', damage: 15, cost: 150, fire_rate: 0.3, range: 120, position: 6, gameId: 2, projectileId: 3 },
 ];
 
+
+const enemiesData = [
+    { id: 1, name: 'daggerkin', level:1, health: 40, speed: 30, lifes: 1, resistante: null, avatar: '' },
+    { id: 2, name: 'orcutter', level:2, health: 60, speed: 15, lifes: 1,resistante: null, avatar: '' },
+    { id: 3, name: 'oculom', level:3, health: 40, speed: 25, lifes: 1,resistante: null, avatar: '' },
+    { id: 4, name: 'devilOrc', level:4, health: 90, speed: 12, lifes: 1,resistante: null, avatar: '' },
+    { id: 5, name: 'graySkull', level:5, health: 140, speed: 8, lifes: 3,resistante: null, avatar: '' },
+    { id: 6, name: 'carrionTropper', level:6, health: 90, speed: 14, lifes: 2, resistante: null, avatar: '' },
+    { id: 7, name: 'hellBat', level:7, health: 90, speed: 17, lifes: 2,resistante: null, avatar: '' },
+    { id: 8, name: 'hexLord', level:8, health: 90, speed: 17, lifes: 4,resistante: null, avatar: '' },
+    { id: 9, name: 'darkSeer', level:9, health: 140, speed: 10, lifes: 5,resistante: null, avatar: '' },
+]
+    
+
  
 
 
@@ -236,9 +251,8 @@ const populateDatabase = async () => {
         const projectiles = await Projectile.bulkCreate(projectilesData, { returning: true });
         console.log('Projectiles created:', projectiles.length);
 
-        // Create the towers
-        const towers = await Tower.bulkCreate(towersData, { returning: true });
-        console.log('Towers created:', towers.length);
+        const enemies = await Enemy.bulkCreate(enemiesData, { returning: true });
+        console.log('Enemies created:', enemies.length);
 
         // Assign the avatars to the users
         for (let i = 0; i < UserAvatars.length; i++) {
@@ -246,13 +260,6 @@ const populateDatabase = async () => {
             const user = await User.findByPk(userId);
             await user.addAvatar(avatarId);
           }
-
-        // Assign active avatar to the users
-
-
-        
-
-       
 
     } catch (error) {
         console.error('Error populating the database:', error);
