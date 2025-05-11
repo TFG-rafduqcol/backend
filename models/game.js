@@ -35,7 +35,7 @@ const Game = sequelize.define("Game", {
         type: DataTypes.INTEGER,
         defaultValue: 20,
         validate: {
-          min: 0,
+          min: -20,
           max: 20,
         },
       },
