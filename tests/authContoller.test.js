@@ -164,6 +164,7 @@ describe('POST /api/auth/login', () => {
     jest.spyOn(sequelize, 'transaction').mockResolvedValue(transaction);
   });
 
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -252,6 +253,7 @@ describe('POST /api/auth/login', () => {
     const res = await request(app).post(ENDPOINT).send({});
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('Email and password are required.');
+    expect(transaction.rollback).toHaveBeenCalled();
   });
 
   test('500 on server error', async () => {
@@ -277,6 +279,8 @@ describe('PUT /api/auth/update', () => {
     email: 'john@example.com',
     password: 'newpassword123',
   };
+
+  const badPayload = { ...userPayload, email: "" }; 
   const user = { id: 1, isAdmin: false };
 
   const mockUser = {
@@ -296,8 +300,6 @@ describe('PUT /api/auth/update', () => {
     update: jest.fn().mockResolvedValue(true)
   };
 
-  const mockTransaction = { commit: jest.fn(), rollback: jest.fn() };
-
   beforeAll(() => {
     transaction = { commit: jest.fn(), rollback: jest.fn() };
     jest.spyOn(sequelize, 'transaction').mockResolvedValue(transaction);
@@ -314,20 +316,25 @@ describe('PUT /api/auth/update', () => {
     });
   });
 
-  const authenticatedRequest = async ()  => {
-    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });      
+  const authenticatedRequest = async (payload)  => {
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });    
     return request(app)
       .put(`${ENDPOINT}/1`)  
       .set('Authorization', `Bearer ${token}`)
-      .send(userPayload);
+      .send(payload);
   };
 
   test('200 - Successfully updates user', async () => {
 
-    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
-    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
-
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser);
     jest.spyOn(User, 'findOne').mockResolvedValue(null); 
+
+    mockUser.update.mockImplementation(async (values) => {
+      Object.assign(mockUser, values);
+      return mockUser;
+    });
+
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser);
     jest.spyOn(bcrypt, 'genSalt').mockResolvedValue('salt');
     jest.spyOn(bcrypt, 'hash').mockResolvedValue('passwordHashed');
 
@@ -340,78 +347,75 @@ describe('PUT /api/auth/update', () => {
         password: 'passwordHashed',
     });
 
-
-    const res = await authenticatedRequest();
+    const res = await authenticatedRequest(userPayload);
     
     expect(res.status).toBe(200);
     expect(mockUser.update).toHaveBeenCalledWith(
-      expect.objectContaining({
-        firstName: userPayload.firstName,
-        lastName: userPayload.lastName,
-        username: userPayload.username,
-        email: userPayload.email,
-        password: 'passwordHashed',
+    expect.objectContaining({
+      firstName: userPayload.firstName,
+      lastName: userPayload.lastName,
+      username: userPayload.username,
+      email: userPayload.email,
+      password: 'passwordHashed',
+    }),
+    expect.objectContaining({
+      transaction: expect.objectContaining({
+        commit: expect.any(Function),
+        rollback: expect.any(Function),
       }),
-      expect.objectContaining({
-        transaction: mockTransaction,
-      })
-    );
-    
+    })
+);
+
     expect(res.body.user.id).toBe(mockUser.id);
     expect(res.body.user.firstName).toBe(userPayload.firstName);
     expect(res.body.user.lastName).toBe(userPayload.lastName);
     expect(res.body.user.username).toBe(userPayload.username);
     expect(res.body.user.email).toBe(userPayload.email);
     expect(res.body.token).toBeDefined(); 
-    
-
-  
 
   });
 
-  // test('400 - Missing required fields', async () => {
-  //   const badPayload = { ...userPayload, email: '' };
+  test('400 - Missing required fields', async () => {
+    
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser);
+    const res = await authenticatedRequest(badPayload);
+    console.log("res", res.body);
 
-  //   const res = await request(app)
-  //     .put(`${ENDPOINT}/1`)
-  //     .set('Authorization', 'Bearer validtoken')
-  //     .send(badPayload);
+    expect(res.status).toBe(400);
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
 
-  //   expect(res.status).toBe(400);
-  //   expect(res.body.message).toMatch(/First name.*required/);
-  //   expect(mockTransaction.rollback).toHaveBeenCalled();
-  // });
+  test('404 - User not found', async () => {
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(null); 
 
-  // test('404 - User not found', async () => {
-  //   jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); // loggedUser
-  //   jest.spyOn(User, 'findByPk').mockResolvedValueOnce(null); // user to update
+    const res = await authenticatedRequest(userPayload);
 
-  //   const res = await authenticatedRequest();
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('User not found.');
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
 
-  //   expect(res.status).toBe(404);
-  //   expect(res.body.message).toBe('User not found.');
-  //   expect(mockTransaction.rollback).toHaveBeenCalled();
-  // });
+  test('400 - Email already in use', async () => {
+    const userWithSameEmail = { ...mockUser, id: 999, emaiil: "sameEmail@gmail.com" };
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
+    jest.spyOn(User, 'findOne').mockResolvedValue(userWithSameEmail); 
 
-  // test('400 - Email already in use', async () => {
-  //   jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); // loggedUser
-  //   jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); // user to update
-  //   jest.spyOn(User, 'findOne').mockResolvedValue({ id: 999 }); // another user with the same email
+    const res = await authenticatedRequest( { ...userPayload, email: "sameEmail@gmail.com" });
 
-  //   const res = await authenticatedRequest();
+    expect(res.status).toBe(400);
+    expect(res.body.message).toBe('Email is already in use by another user.');
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
 
-  //   expect(res.status).toBe(400);
-  //   expect(res.body.message).toBe('Email is already in use by another user.');
-  //   expect(mockTransaction.rollback).toHaveBeenCalled();
-  // });
+  test('500 - Internal server error', async () => {
+    jest.spyOn(User, 'findByPk').mockRejectedValue(new Error('DB crash'));
 
-  // test('500 - Internal server error', async () => {
-  //   jest.spyOn(User, 'findByPk').mockRejectedValue(new Error('DB crash'));
+    const res = await authenticatedRequest(userPayload);
 
-  //   const res = await authenticatedRequest();
-
-  //   expect(res.status).toBe(500);
-  //   expect(res.body.message).toBe('An error occurred while updating the user.');
-  //   expect(mockTransaction.rollback).toHaveBeenCalled();
-  // });
+    expect(res.status).toBe(500);
+    expect(res.body.message).toBe('An error occurred while updating the user.');
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
 });
