@@ -3,13 +3,12 @@ jest.spyOn(console, 'error').mockImplementation(() => {});
 
 const request = require('supertest');
 const app = require('../server');
-const { sequelize, User, Avatar, Range } = require('../models/index');
+const { sequelize, User } = require('../models/index');
 const bcrypt = require('bcryptjs');
 let transaction;
 const jwt = require('jsonwebtoken');
+const  { authorizedRequestWithOutToken, authorizedRequestWithBadToken } = require('./utils');
 
-
-/* ─── Tests checkEmail ─────────────────────── */
 describe('POST /api/auth/checkEmail', () => {
   beforeAll(() => {
     transaction = { commit: jest.fn(), rollback: jest.fn() };
@@ -75,7 +74,6 @@ describe('POST /api/auth/checkEmail', () => {
   });
 });
 
-/* ─── Tests registerPlayer ─────────────────────── */
 describe('POST /api/auth/register', () => {
   const ENDPOINT = '/api/auth/register';
   const payload = {
@@ -120,7 +118,7 @@ describe('POST /api/auth/register', () => {
   });
 
   test('500 on other error', async () => {
-    jest.spyOn(User, 'create').mockRejectedValue(new Error('Oops'));
+    jest.spyOn(User, 'create').mockRejectedValue(new Error('DB crash'));
 
     const res = await request(app).post(ENDPOINT).send(payload);
 
@@ -136,7 +134,6 @@ describe('POST /api/auth/register', () => {
   });
 });
 
-/* ─── Tests loginPlayer ─────────────────────── */
 describe('POST /api/auth/login', () => {
   const ENDPOINT = '/api/auth/login';
   const payload = {
@@ -324,6 +321,8 @@ describe('PUT /api/auth/update', () => {
       .send(payload);
   };
 
+
+
   test('200 - Successfully updates user', async () => {
 
     jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser);
@@ -385,17 +384,6 @@ describe('PUT /api/auth/update', () => {
     expect(transaction.rollback).toHaveBeenCalled();
   });
 
-  test('404 - User not found', async () => {
-    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
-    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(null); 
-
-    const res = await authenticatedRequest(userPayload);
-
-    expect(res.status).toBe(404);
-    expect(res.body.message).toBe('User not found.');
-    expect(transaction.rollback).toHaveBeenCalled();
-  });
-
   test('400 - Email already in use', async () => {
     const userWithSameEmail = { ...mockUser, id: 999, emaiil: "sameEmail@gmail.com" };
     jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
@@ -408,6 +396,30 @@ describe('PUT /api/auth/update', () => {
     expect(res.body.message).toBe('Email is already in use by another user.');
     expect(transaction.rollback).toHaveBeenCalled();
   });
+
+  test('401 - Missing token', async () => {
+    const res = await authorizedRequestWithOutToken(`${ENDPOINT}/${1}`, 'put', userPayload);
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Token is missing');
+  });
+
+  test ('403 - Unauthorized user', async () => {
+    const res = await authorizedRequestWithBadToken(`${ENDPOINT}/${1}`, 'put', userPayload);
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe('Invalid or expired token');
+  });
+
+    test('404 - User not found', async () => {
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser); 
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(null); 
+
+    const res = await authenticatedRequest(userPayload);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('User not found.');
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
+
 
   test('500 - Internal server error', async () => {
     jest.spyOn(User, 'findByPk').mockRejectedValue(new Error('DB crash'));
