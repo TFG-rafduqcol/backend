@@ -10,6 +10,7 @@ const Projectile = require('./projectile');
 const Upgrade = require('./upgrade');
 const Avatar = require('./avatar');
 const Range = require('./range');
+const FriendShip = require('./friendShip');
 
 
 User.hasMany(Game);
@@ -84,4 +85,4 @@ Avatar.belongsToMany(User, {
   otherKey: 'userId'
 });
 
-module.exports = { sequelize, User, Game, Wave, Tower, Projectile, Upgrade, Enemy, Range };
+module.exports = { sequelize, User, Game, Wave, Tower, Projectile, Upgrade, Enemy, Range, Avatar, FriendShip };

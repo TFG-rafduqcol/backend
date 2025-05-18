@@ -35,7 +35,7 @@ describe('GET /api/social/getUserByUsernameOrId/:usernameOrId', () => {
     jest.clearAllMocks();
   });
 
-  it('200 - User retrieves player/s successfully', async () => {
+  test('200 - User retrieves player/s successfully', async () => {
 
     const mockFriendship = {
       user1Id: 1,
@@ -66,7 +66,7 @@ describe('GET /api/social/getUserByUsernameOrId/:usernameOrId', () => {
     expect(res.body.message).toBe('Invalid or expired token');
   });
 
-  it('404 - Should return error when user is not found', async () => {
+  test('404 - Should return error when user is not found', async () => {
     jest.spyOn(User, 'findAll').mockResolvedValue([]);
 
     const res = await authenticatedRequest('non_existent_user');
@@ -76,7 +76,7 @@ describe('GET /api/social/getUserByUsernameOrId/:usernameOrId', () => {
   });
 
 
-  it('500 - Should handle unexpected errors', async () => {
+  test('500 - Should handle unexpected errors', async () => {
     jest.spyOn(User, 'findAll').mockRejectedValue(new Error('DB error'));
 
     const res= await authenticatedRequest('john_doe');
@@ -116,7 +116,7 @@ describe('GET /api/social/getUserById/:userId', () => {
     jest.clearAllMocks();
   });
 
-  it('200 - Should retrieve user successfully', async () => {
+  test('200 - Should retrieve user successfully', async () => {
     jest.spyOn(User, 'findByPk').mockResolvedValue(mockUser);
 
     const res = await authenticatedRequest(1);
@@ -145,7 +145,7 @@ describe('GET /api/social/getUserById/:userId', () => {
     expect(res.body.message).toBe('Invalid or expired token');
   });
 
-  it('404 - Should return error when user is not found', async () => {
+  test('404 - Should return error when user is not found', async () => {
     jest.spyOn(User, 'findByPk').mockResolvedValue(null);
 
     const res = await authenticatedRequest(999);
@@ -155,7 +155,7 @@ describe('GET /api/social/getUserById/:userId', () => {
     expect(res.body.message).toBe('User not found');
   });
 
-  it('500 - Should handle unexpected errors', async () => {
+  test('500 - Should handle unexpected errors', async () => {
     jest.spyOn(User, 'findByPk').mockRejectedValue(new Error('DB error'));
 
     const res = await authenticatedRequest(1);
@@ -203,7 +203,7 @@ describe('GET /api/social/getMyFriends', () => {
     jest.clearAllMocks();
   });
 
-  it('200 - Should retrieve friends successfully', async () => {
+  test('200 - Should retrieve friends successfully', async () => {
     jest.spyOn(FriendShip, 'findAll').mockResolvedValue([mockFriendship]);
 
     const res = await authenticatedRequest();
@@ -219,7 +219,7 @@ describe('GET /api/social/getMyFriends', () => {
     expect(transaction.commit).toHaveBeenCalled();
   });
 
-  it('200 - Should return empty friends array if no friendships found', async () => {
+  test('200 - Should return empty friends array if no friendships found', async () => {
     jest.spyOn(FriendShip, 'findAll').mockResolvedValue([]);
 
     const res = await authenticatedRequest();
@@ -230,7 +230,7 @@ describe('GET /api/social/getMyFriends', () => {
     expect(transaction.commit).toHaveBeenCalled();
   });
 
-  it('400 - Should return error when userId is missing', async () => {
+  test('400 - Should return error when userId is missing', async () => {
     const token = jwt.sign({}, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     const res = await request(app)
@@ -254,7 +254,7 @@ describe('GET /api/social/getMyFriends', () => {
     expect(res.body.message).toBe('Invalid or expired token');
   });
 
-  it('500 - Should handle unexpected errors', async () => {
+  test('500 - Should handle unexpected errors', async () => {
     jest.spyOn(FriendShip, 'findAll').mockRejectedValue(new Error('DB error'));
 
     const res = await authenticatedRequest();
@@ -297,7 +297,7 @@ describe('GET /api/social/getMyFriendRequests', () => {
     jest.clearAllMocks();
   });
 
-  it('200 - Should retrieve friend requests successfully', async () => {
+  test('200 - Should retrieve friend requests successfully', async () => {
     jest.spyOn(FriendShip, 'findAll').mockResolvedValue([mockFriendship]);
 
     const res = await authenticatedRequest();
@@ -315,7 +315,7 @@ describe('GET /api/social/getMyFriendRequests', () => {
     expect(transaction.commit).toHaveBeenCalled();
   });
 
-  it('200 - Should return empty users array if no requests found', async () => {
+  test('200 - Should return empty users array if no requests found', async () => {
     jest.spyOn(FriendShip, 'findAll').mockResolvedValue([]);
 
     const res = await authenticatedRequest();
@@ -338,7 +338,7 @@ describe('GET /api/social/getMyFriendRequests', () => {
     expect(res.body.message).toBe('Invalid or expired token');
   });
 
-  it('400 - Should return error when userId is missing', async () => {
+  test('400 - Should return error when userId is missing', async () => {
     const token = jwt.sign({}, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     const res = await request(app)
@@ -350,7 +350,7 @@ describe('GET /api/social/getMyFriendRequests', () => {
     expect(res.body.message).toBe('User ID is required');
   });
 
-  it('500 - Should handle unexpected errors and rollback transaction', async () => {
+  test('500 - Should handle unexpected errors and rollback transaction', async () => {
     jest.spyOn(FriendShip, 'findAll').mockRejectedValue(new Error('DB error'));
 
     const res = await authenticatedRequest();
@@ -384,7 +384,7 @@ describe('POST /api/social/sendFriendRequest/:userId', () => {
     jest.clearAllMocks();
   });
 
-  it('200 - Should create new friend request if no existing one', async () => {
+  test('200 - Should create new friend request if no existing one', async () => {
     jest.spyOn(FriendShip, 'findOne').mockResolvedValue(null);
     const mockFriendship = { user1Id: 1, user2Id: 2, status: 'pending' };
     jest.spyOn(FriendShip, 'create').mockResolvedValue(mockFriendship);
@@ -403,7 +403,7 @@ describe('POST /api/social/sendFriendRequest/:userId', () => {
   });
 
 
-  it('200 - Should delete existing friendship and create new one', async () => {
+  test('200 - Should delete existing friendship and create new one', async () => {
     const mockDestroy = jest.fn().mockResolvedValue();
     const existingFriendship = { destroy: mockDestroy };
 
@@ -419,7 +419,7 @@ describe('POST /api/social/sendFriendRequest/:userId', () => {
   });
 
 
- it('400 - Should return error if loggedUserId is missing', async () => {
+ test('400 - Should return error if loggedUserId is missing', async () => {
     const token = jwt.sign({}, process.env.JWT_SECRET, { expiresIn: '1h' }); 
 
     const res = await request(app)
@@ -444,7 +444,7 @@ describe('POST /api/social/sendFriendRequest/:userId', () => {
   });
 
 
-  it('500 - Should handle errors and rollback transaction', async () => {
+  test('500 - Should handle errors and rollback transaction', async () => {
     jest.spyOn(FriendShip, 'findOne').mockRejectedValue(new Error('DB error'));
 
     const res = await authenticatedRequest();
@@ -479,7 +479,7 @@ describe('POST /api/social/changeFriendRequestStatus/:userId', () => {
   });
 
 
-it('200 - Should modify the status of a friend request', async () => {
+test('200 - Should modify the status of a friend request', async () => {
   const transaction = { commit: jest.fn(), rollback: jest.fn() };
   const friendship = { status: 'pending', save: jest.fn() };
 
@@ -498,7 +498,7 @@ it('200 - Should modify the status of a friend request', async () => {
 });
 
 
-  it('400 - Should return error if userId, friendId or status are missing', async () => {
+  test('400 - Should return error if userId, friendId or status are missing', async () => {
     const res = await authenticatedRequest(2, null);
     expect(res.status).toBe(400);
     expect(res.body.message).toBe('User ID, friend ID, and status are required');
@@ -516,7 +516,7 @@ it('200 - Should modify the status of a friend request', async () => {
     expect(res.body.message).toBe('Invalid or expired token');
   });
 
-  it('404 - Should return error if friendship is not found', async () => {
+  test('404 - Should return error if friendship is not found', async () => {
     jest.spyOn(FriendShip, 'findOne').mockResolvedValue(null);
 
     const res = await authenticatedRequest(2, 'accepted');
@@ -527,7 +527,7 @@ it('200 - Should modify the status of a friend request', async () => {
 
   });
 
-  it('500 - Should return error if there is a server error', async () => {
+  test('500 - Should return error if there is a server error', async () => {
     jest.spyOn(FriendShip, 'findOne').mockRejectedValue(new Error('DB crash'));
 
     const res = await authenticatedRequest(2, 'accepted');
@@ -574,7 +574,7 @@ describe('DELETE /api/social/removeFriend/:userId', () => {
 
  
 
-  it('200 - Should remove friend successfully', async () => {
+  test('200 - Should remove friend successfully', async () => {
 
     jest.spyOn(FriendShip, 'findOne').mockResolvedValue(mockFriendship);
     const friendship = { destroy: jest.fn()};
@@ -592,7 +592,7 @@ describe('DELETE /api/social/removeFriend/:userId', () => {
     expect(transaction.commit).toHaveBeenCalled();
   });
 
-  it('400 - Should return error if User ID or friend ID is missing', async () => {
+  test('400 - Should return error if User ID or friend ID is missing', async () => {
     const res = await authenticatedRequestWithInvalidId(2);
 
     expect(res.status).toBe(400);
@@ -612,7 +612,7 @@ describe('DELETE /api/social/removeFriend/:userId', () => {
     expect(res.body.message).toBe('Invalid or expired token');
   });
 
-  it('404 - Should return error if friendship not found', async () => {
+  test('404 - Should return error if friendship not found', async () => {
     jest.spyOn(FriendShip, 'findOne').mockResolvedValue(null);
 
     const res = await authenticatedRequest(2);
@@ -622,7 +622,7 @@ describe('DELETE /api/social/removeFriend/:userId', () => {
     expect(transaction.rollback).toHaveBeenCalled();
   });
 
-  it('500 - Should return internal server error if something goes wrong', async () => {
+  test('500 - Should return internal server error if something goes wrong', async () => {
     jest.spyOn(FriendShip, 'findOne').mockRejectedValue(new Error('DB crash'));
 
     const res = await authenticatedRequest(2);

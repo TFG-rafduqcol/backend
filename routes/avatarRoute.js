@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getMyAvatars, changeMyActiveAvatar } = require('../controllers/avatarController');
+const { getMyAvatars, changeMyActiveAvatar, buyAvatar } = require('../controllers/avatarController');
 const authenticateToken = require("../middlewares/authMiddleware");
 
 /** 
@@ -50,5 +50,72 @@ router.get('/getMyAvatars', authenticateToken, getMyAvatars);
  */
 
 router.put('/changeMyActiveAvatar/:avatarId', authenticateToken, changeMyActiveAvatar);
+
+/**
+ * @swagger
+ * /api/avatars/buyAvatar/{avatarId}:
+ *  post:
+ *   tags:
+ *    - Avatar
+ *   summary: Purchase an avatar
+ *   description: Allows a logged-in user to purchase an avatar by its ID if they have enough gems.
+ *   parameters:
+ *    - name: avatarId
+ *      in: path
+ *      required: true
+ *      description: ID of the avatar to be purchased
+ *      schema:
+ *       type: integer
+ *       example: 3
+ *   responses:
+ *    200:
+ *     description: Avatar purchased successfully
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Avatar purchased successfully.
+ *    400:
+ *     description: Insufficient coins to purchase avatar
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         error:
+ *          type: string
+ *          example: InsufficientCoins
+ *         message:
+ *          type: string
+ *          example: You do not have enough coins to buy this avatar.
+ *    404:
+ *     description: Avatar or user not found
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         error:
+ *          type: string
+ *          example: AvatarNotFound
+ *         message:
+ *          type: string
+ *          example: Avatar not found
+ *    500:
+ *     description: Internal server error
+ *     content:
+ *      application/json:
+ *       schema:
+ *        type: object
+ *        properties:
+ *         message:
+ *          type: string
+ *          example: Internal server error.
+ */
+
+router.post('/buyAvatar/:avatarId', authenticateToken, buyAvatar);
 
 module.exports = router;

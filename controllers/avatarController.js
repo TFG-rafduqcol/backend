@@ -1,6 +1,8 @@
 const sequelize = require('../models/index').sequelize;
 const User = require("../models/user");
 const Avatar = require("../models/avatar");
+
+
 const getMyAvatars = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
@@ -12,19 +14,19 @@ const getMyAvatars = async (req, res) => {
           {
             model: Avatar,
             as: 'active_avatar',  
-            attributes: ['id', 'image_url']  
+            attributes: ['id', 'image_url', 'gems']  
           },
           {
             model: Avatar,
             as: 'avatars',  
-            attributes: ['id', 'image_url'] 
+            attributes: ['id', 'image_url', 'gems'] 
           }
         ],
       transaction
     });
 
     const allAvatars = await Avatar.findAll({
-      attributes: ['id', 'image_url'],
+      attributes: ['id', 'image_url', 'gems'],
       transaction
     });
 
@@ -77,6 +79,7 @@ const changeMyActiveAvatar = async (req, res) => {
       transaction
     });
 
+
     if (!avatar || !userAvatars.avatars.some(a => a.id === parseInt(avatarId))) {
       await transaction.rollback();
       return res.status(404).json({
@@ -96,5 +99,66 @@ const changeMyActiveAvatar = async (req, res) => {
   }
 };
 
+const buyAvatar = async (req, res) => {
+  const transaction = await sequelize.transaction();
+  try {
+    const loggedUserId = req.userId;
+    const avatarId = req.params.avatarId;
 
-module.exports = { getMyAvatars, changeMyActiveAvatar };
+    const avatar = await Avatar.findByPk(avatarId, { transaction });
+
+    if (!avatar) {
+      await transaction.rollback();
+      return res.status(404).json({
+        error: "AvatarNotFound",
+        message: "Avatar not found",
+      });
+    }
+
+    const user = await User.findByPk(loggedUserId, { transaction });
+
+    if (!user) {
+      await transaction.rollback();
+      return res.status(404).json({
+        error: "UserNotFound",
+        message: "User not found",
+      });
+    }
+
+  
+
+    if (user.gems < avatar.gems) {
+      await transaction.rollback();
+      return res.status(400).json({
+        error: "InsufficientCoins",
+        message: "You do not have enough coins to buy this avatar.",
+      });
+    }
+    
+
+    user.gems -= avatar.gems;
+    console.log(user.gems);
+    await user.save({ transaction });
+
+    const hasAvatar = await user.hasAvatar(avatar, { transaction });
+    if (!hasAvatar) {
+      await user.addAvatar(avatar, { transaction });
+    } else {
+      await transaction.rollback();
+      return res.status(400).json({
+        error: "AvatarAlreadyOwned",
+        message: "You already own this avatar.",
+      });
+    }
+
+    await transaction.commit();
+
+    return res.status(200).json({ message: "Avatar purchased successfully." });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("Error purchasing avatar:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
+module.exports = { getMyAvatars, changeMyActiveAvatar, buyAvatar };

@@ -180,6 +180,101 @@ describe('GET /api/admin/getAllUsers', () => {
   });
 });
 
+describe('POST /api/auth/register', () => {
+  const ENDPOINT = '/api/auth/register';
+  let transaction;
+
+  beforeAll(() => {
+    transaction = { commit: jest.fn(), rollback: jest.fn() };
+    jest.spyOn(sequelize, 'transaction').mockResolvedValue(transaction);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const validUserData = {
+    firstName: 'John',
+    lastName: 'Doe',
+    username: 'johndoe',
+    email: 'john@example.com',
+    role: 1,
+    password: 'password123'
+  };
+
+  test('201 - User registered successfully', async () => {
+    const mockCreatedUser = {
+      ...validUserData,
+      id: 1,
+      isAdmin: 0,
+      activeAvatarId: 1,
+      rangeId: 1
+    };
+
+    jest.spyOn(User, 'create').mockResolvedValueOnce(mockCreatedUser);
+
+    const res = await request(app)
+      .post(ENDPOINT)
+      .send(validUserData);
+
+    expect(res.status).toBe(201);
+    expect(res.body.email).toBe(validUserData.email);
+    expect(transaction.commit).toHaveBeenCalled();
+  });
+
+  test('400 - Email already in use (Sequelize unique constraint)', async () => {
+    const sequelizeError = {
+      name: "SequelizeUniqueConstraintError",
+      errors: [{ path: "email" }]
+    };
+
+    jest.spyOn(User, 'create').mockRejectedValueOnce(sequelizeError);
+
+    const res = await request(app)
+      .post(ENDPOINT)
+      .send(validUserData);
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe("EmailDuplicate");
+    expect(res.body.message).toBe("This email is already in use.");
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
+
+  test('400 - Email already in use (MySQL duplicate entry)', async () => {
+    const mysqlError = {
+      code: "ER_DUP_ENTRY",
+      sqlState: "23000"
+    };
+
+    jest.spyOn(User, 'create').mockRejectedValueOnce(mysqlError);
+
+    const res = await request(app)
+      .post(ENDPOINT)
+      .send(validUserData);
+
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe("EmailDuplicate");
+    expect(res.body.message).toBe("This email is already in use.");
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
+
+  test('500 - Unexpected error during registration', async () => {
+    const unexpectedError = new Error("Something went wrong");
+
+    jest.spyOn(User, 'create').mockRejectedValueOnce(unexpectedError);
+
+    const res = await request(app)
+      .post(ENDPOINT)
+      .send(validUserData);
+
+    expect(res.status).toBe(500);
+    expect(res.body.error).toBe("ServerError");
+    expect(res.body.message).toBe("An error occurred while registering the user.");
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
+});
+
+
 
 describe('DELETE /api/admin/deleteUser/:userId', () => {
   const ENDPOINT = '/api/admin/deleteUser';

@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require("../config/db");
 const User = require('./user'); 
+
 const FriendShip = sequelize.define('FriendShip', {
   user1Id: {
     type: DataTypes.INTEGER,

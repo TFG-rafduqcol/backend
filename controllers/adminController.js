@@ -1,6 +1,6 @@
 const sequelize = require('../models/index').sequelize;
 const User = require("../models/user");
-const FriendShip = require("../models/friendship");
+const FriendShip = require("../models/friendShip");
 const Game = require("../models/game");
 const { Op } = require("sequelize");
 
@@ -11,7 +11,15 @@ const isAdmin = async (req, res, next) => {
         const userId = req.userId;
         const user = await User.findByPk(userId, { transaction });
 
-        const isAdmin = user ? Boolean(user.isAdmin) : false;
+        if (!user) {
+            await transaction.rollback();
+            return res.status(401).json({
+                error: "Unauthorized",
+                message: "User not found or not authenticated.",
+            });
+        }
+
+        const isAdmin = Boolean(user.isAdmin);
         await transaction.commit();
         
         return res.status(200).json({ isAdmin });
@@ -39,7 +47,6 @@ const getAllUsers = async (req, res) => {
             });
         }
 
-        // Paginación: ?page=1
         const page = parseInt(req.query.page) || 1;
         const limit = 20;
         const offset = (page - 1) * limit;
@@ -134,7 +141,6 @@ const deleteUser = async (req, res) => {
             });
         }
 
-        // Elimina las relaciones en la tabla friendships
         await FriendShip.destroy({
             where: {
                 [Op.or]: [
@@ -145,18 +151,12 @@ const deleteUser = async (req, res) => {
             transaction
         });
 
-        // Elimina los juegos del usuario
         await Game.destroy({
             where: { userId },
             transaction
         });
 
-        // Elimina las estadísticas del usuario
-        await UserStats.destroy({
-            where: { userId },
-            transaction
-        });
-
+   
         await user.destroy({ transaction });
 
         await transaction.commit();
