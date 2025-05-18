@@ -4,15 +4,17 @@ const Tower = require('../models/tower');
 const Projectile = require('../models/projectile');
 const Enemy = require('../models/enemy');
 const Upgrade = require('../models/upgrade');
+const { json } = require('sequelize');
+
 
 
 const generateHorde = async (req, res) => {
   const { gameId } = req.params;
-  const spacingTime = 1.5; // segundos entre enemigos
+  const spacingTime   = 1.5;  // segundos entre enemigos
   const MAX_HORDE_SIZE = 10;
   const POPULATION_SIZE = 30;
-  const GENERATIONS = 40;
-  const MUTATION_RATE = 0.1;
+  const GENERATIONS    = 40;
+  const MUTATION_RATE  = 0.1;
 
   if (!gameId) return res.status(400).json({ error: 'Missing gameId' });
 
@@ -40,233 +42,219 @@ const generateHorde = async (req, res) => {
   ];
 
   try {
-    const towersData = await Tower.findAll({ where: { gameId } });
-    const enemyTypes = await Enemy.findAll();
-    const fullPath = interpolatePath(rawPath);
 
-    const towerZones = towerPositions.map(t => {
-      const d = towersData.find(x => x.position === t.position);
-      if (!d) return null;
-      return {
-        position: t.position,
-        name: d.name,
-        x: t.x,
-        y: t.y,
-        range: d.range,
-        damage: d.damage,
-        fire_rate: d.fire_rate
-      };
-    }).filter(Boolean);
+    const towersData   = await Tower.findAll({ where: { gameId } });
+    const enemyTypes   = await Enemy.findAll();
+    const fullPath     = interpolatePath(rawPath);
+
+    // Zonas de torre
+    const towerZones = towerPositions
+      .map(tp => {
+        const d = towersData.find(t => t.position === tp.position);
+        if (!d) return null;
+        return {
+          position:  tp.position,
+          name:      d.name,
+          x:         tp.x,
+          y:         tp.y,
+          range:     d.range,
+          damage:    d.damage,
+          fire_rate: d.fire_rate
+        };
+      })
+      .filter(Boolean);
 
     function randomHorde() {
       const size = Math.ceil(Math.random() * MAX_HORDE_SIZE);
-      return Array.from({ length: size }, () =>
-        enemyTypes[Math.floor(Math.random() * enemyTypes.length)]
-      );
+      return Array.from({ length: size }, () => {
+        const et = enemyTypes[Math.floor(Math.random() * enemyTypes.length)];
+        return { ...et.get(), spawnTime: 0 }; 
+      });
     }
 
+    function simulateHits(horde) {
+      horde.forEach(e => {
+        e.hits = {};
+        e.healthRemaining = e.health;
+        e.isDead = false;
+      });
 
-    // Mas adelante se puede optimiza el algoritmo en vez de hacerlo cada 0.1s, hacerlo con el fire_rate de cada torre una vez detecte a un enemigo
-   
-   function simulateHits(horde) {
-  horde.forEach(enemy => {
-    enemy.hits = {};
-    enemy.healthRemaining = enemy.health;
-    enemy.isDead = false;
-  });
+      for (const tower of towerZones) {
+        const maxT = Math.max(...horde.map(e => fullPath.length / e.speed + e.spawnTime));
+        let nextFire = 0;
+        const step = 0.1;
 
-  towerZones.forEach(tower => {
-    const maxT = Math.max(
-      ...horde.map(e => fullPath.length / e.speed + e.spawnTime)
-    );
+        for (let t = 0; t <= maxT; t += step) {
+          if (t < nextFire) continue;
 
-    let nextFire = 0;
+          const target = horde.find(e => {
+            if (e.healthRemaining <= 0 || e.spawnTime > t) return false;
+            const dist = (t - e.spawnTime) * e.speed;
+            if (dist >= fullPath.length) return false;
+            const idx   = Math.min(Math.ceil(dist), fullPath.length - 1);
+            const pt    = fullPath[idx];
+            const d2    = Math.hypot(pt.x - tower.x, pt.y - tower.y);
+            if (tower.name === 'mortar' && ['oculom','hellBat'].includes(e.name))
+              return false;
+            return d2 <= tower.range;
+          });
 
-    for (let t = 0.0; t <= maxT; t += 0.1) {
-      if (t < nextFire) continue;
+          if (!target) continue;
 
-    const enemiesInRange = horde
-  .filter(e => {
-    if (e.healthRemaining <= 0 || e.spawnTime > t) return false;
+          target.hits[tower.position] = (target.hits[tower.position] || 0) + 1;
 
-    const dist = (t - e.spawnTime) * e.speed;
-    if (dist >= fullPath.length) return false;
+          const mult = getDamageMultiplier(target.name, tower.name);
+          const dmg  = tower.damage * mult;
+          target.healthRemaining -= dmg;
+          if (target.healthRemaining <= 0) {
+            target.healthRemaining = 0;
+            target.isDead = true;
+          }
 
-    const index = Math.min(Math.ceil(dist), fullPath.length - 1);
-    const point = fullPath[index];
-    const dx = point.x - tower.x;
-    const dy = point.y - tower.y;
-    const d = Math.hypot(dx, dy);
-
-    const isFlying = ['oculom', 'hellBat'].includes(e.name);
-    if (tower.name === 'mortar' && isFlying) return false;
-
-    return d <= tower.range;
-  })
-  .map(e => ({
-    enemy: e,
-    distanceTraveled: (t - e.spawnTime) * e.speed
-  }))
-  .sort((a, b) => b.distanceTraveled - a.distanceTraveled); // más avanzado primero
-
-const target = enemiesInRange.length > 0 ? enemiesInRange[0].enemy : null;
-
-      if (target) {
-        target.hits[tower.position] = (target.hits[tower.position] || 0) + 1;
-
-        const mult = getDamageMultiplier(target.name, tower.name);
-        const realDamage = tower.damage * mult;
-        target.healthRemaining -= realDamage;
-
-        if (target.healthRemaining <= 0) {
-          target.healthRemaining = 0;
-          target.isDead = true;
+          nextFire = t + tower.fire_rate;
         }
-
-        nextFire = t + tower.fire_rate;
       }
     }
-  });
-}
 
+    const UPRG_RATIO = 1.0;
 
-    const UPRGRADE_RATIO = 1.1; // Mejora de la horda respecto a la tower damage del 10%
-
-    function fitness(horde) {
-      horde.forEach((e, i) => e.spawnTime = i * spacingTime);
+    // Función fitness
+   function fitness(horde) {
+      for (let i = 0; i < horde.length; i++) {
+        horde[i].spawnTime = i * spacingTime;
+      }
       simulateHits(horde);
 
-      const totalHealth = horde.reduce((sum, e) => sum + e.health, 0);
-      const totalDamage = horde.reduce((acc, e) => {
-        let damageToEnemy = 0;
+      let totalHealth = 0;
+      for (let i = 0; i < horde.length; i++) {
+        totalHealth += horde[i].health;
+      }
+
+      let totalDamage = 0;
+      let maxEndTime  = 0;
+      for (let i = 0; i < horde.length; i++) {
+        const e = horde[i];
+
+        const travelTime = fullPath.length / e.speed + e.spawnTime;
+        if (travelTime > maxEndTime) maxEndTime = travelTime;
+
+        let dmg = 0;
         for (const pos in e.hits) {
-          const tower = towerZones.find(t => t.position == pos);
-          if (!tower) continue;
-          const mult = getDamageMultiplier(e.name, tower.name);
-          const damage = tower.damage * e.hits[pos] * mult;
-          damageToEnemy += damage; // Parano hacer sobreestimaciones en el daño total 
+          const tw = towerZones.find(t => t.position === Number(pos));
+          if (!tw) continue;
+          const multE = getDamageMultiplier(e.name, tw.name);
+          dmg += tw.damage * e.hits[pos] * multE;
         }
-        return acc + Math.min(damageToEnemy, e.health);
-      }, 0);
+        totalDamage += Math.min(dmg, e.health);
+      }
 
+      if (totalDamage < totalHealth * UPRG_RATIO) {
+        return -Infinity;
+      }
 
-      const requiredDamage = totalHealth * UPRGRADE_RATIO;
+      const diff = Math.abs(totalHealth - totalDamage * UPRG_RATIO);
 
-      if (totalDamage < requiredDamage) return -Infinity;
-      return -Math.abs(totalHealth - totalDamage * UPRGRADE_RATIO);
+      const dps = totalDamage / maxEndTime;
+
+      const wDiff = 1000;
+      const wDps  = 1;
+
+      return -wDiff * diff + wDps * dps;
     }
 
+
     function select(pop) {
-      const contestants = [
+      const c = [
         pop[Math.floor(Math.random() * pop.length)],
         pop[Math.floor(Math.random() * pop.length)],
         pop[Math.floor(Math.random() * pop.length)]
       ];
-      return contestants.reduce((best, cur) =>
-        fitness(cur) > fitness(best) ? cur : best
-      );
+      return c.reduce((b, c) => fitness(c) > fitness(b) ? c : b);
     }
 
     function crossover(a, b) {
       if (a.length < 2 || b.length < 2) return Math.random() < 0.5 ? [...a] : [...b];
       const cut = Math.floor(Math.random() * Math.min(a.length, b.length));
-      const child = [...a.slice(0, cut), ...b.slice(cut)];
-      return child.slice(0, MAX_HORDE_SIZE);
+      return [...a.slice(0, cut), ...b.slice(cut)].slice(0, MAX_HORDE_SIZE);
     }
-
+    
     function mutate(h) {
       return h.map(e =>
         Math.random() < MUTATION_RATE
-          ? enemyTypes[Math.floor(Math.random() * enemyTypes.length)]
+          ? randomHorde()[0]
           : e
       );
     }
 
+    const ELITE_COUNT = 1; 
     let population = Array.from({ length: POPULATION_SIZE }, randomHorde);
 
     for (let gen = 0; gen < GENERATIONS; gen++) {
-      const newPop = [];
-      for (let i = 0; i < POPULATION_SIZE; i++) {
+      population.sort((a, b) => fitness(b) - fitness(a));
+      const next = [];
+     
+      for (let i = 0; i < ELITE_COUNT; i++) {
+        next.push(population[i]);
+      }
+
+      while (next.length < POPULATION_SIZE) {
         const p1 = select(population);
         const p2 = select(population);
         let child = crossover(p1, p2);
         child = mutate(child);
-        newPop.push(child);
+        next.push(child);
       }
-      population = newPop;
+
+      population = next;
     }
 
-    const best = population.reduce((b, c) => (fitness(c) > fitness(b) ? c : b));
 
-    const result = best.map((e, i) => ({
-      id: i + 1,
-      spawnTime: i * spacingTime,
-      speed: e.speed,
-      health: e.health,
-      name: e.name
-    }));
-
-    let bestTotalHealth = 0;
-    let bestTotalDamage = 0;
-
+    const best = population.reduce((b, c) => fitness(c) > fitness(b) ? c : b);
     best.forEach((e, i) => e.spawnTime = i * spacingTime);
     simulateHits(best);
 
+    const result = best.map((e, i) => ({
+      id:         i + 1,
+      spawnTime:  e.spawnTime,
+      speed:      e.speed,
+      health:     e.health,
+      name:       e.name
+    }));
+
+    let bestH = 0, bestD = 0;
     best.forEach(e => {
-      bestTotalHealth += e.health;
+      bestH += e.health;
+      totalDamage = 0;
       for (const pos in e.hits) {
-        const tower = towerZones.find(t => t.position == pos);
-        if (!tower) continue;
-        const mult = getDamageMultiplier(e.name, tower.name);
-        bestTotalDamage += Math.min(tower.damage * e.hits[pos] * mult, e.health);
+        const tw = towerZones.find(t => t.position == pos);
+        if (!tw) continue;
+        totalDamage += tw.damage * e.hits[pos] * getDamageMultiplier(e.name, tw.name);
+      }
+      bestD += Math.min(totalDamage, e.health);
+    });
+
+    // Printear cuantos hits le dan a cada enemigo y cuanto daño le hacen
+    console.log('Best Horde values: \n Best Health:', bestH, '\n Best Damage:', bestD);
+
+    // Impactos en cada enemigo
+    best.forEach(e => {
+      console.log('Enemy:', e.name);
+      for (const pos in e.hits) {
+        const tw = towerZones.find(t => t.position == pos);
+        if (!tw) continue;
+        const multE = getDamageMultiplier(e.name, tw.name);
+        console.log(`  Tower ${tw.position} (${tw.name}) hits: ${e.hits[pos]}`);
       }
     });
 
-   const score = fitness(population[0]);
-  console.log("Fitness:", score);
-
-  const totalHealth = population[0].reduce((sum, e) => sum + e.health, 0);
-  const totalDamage = population[0].reduce((acc, e) => {
-    let damageToEnemy = 0;
-    for (const pos in e.hits) {
-      const tower = towerZones.find(t => t.position == pos);
-      if (!tower) continue;
-      const mult = getDamageMultiplier(e.name, tower.name);
-      const damage = tower.damage * e.hits[pos] * mult;
-      damageToEnemy += damage;
-    }
-    return acc + Math.min(damageToEnemy, e.health);
-  }, 0);
-
-  const required = totalHealth * UPRGRADE_RATIO;
-  console.log(`Total Health: ${totalHealth.toFixed(2)}`);
-  console.log(`Total Damage Dealt: ${totalDamage.toFixed(2)}`);
-  console.log(`Required Damage (ratio ${UPRGRADE_RATIO}): ${required.toFixed(2)}`);
-
-  //Printear el numero de impactos que recibira cada enemigo
-  best.forEach(e => {
-    console.log(`Enemy ${e.name} will receive hits:`);
-    let totalDamage = 0;
-    for (const pos in e.hits) {
-      const tower = towerZones.find(t => t.position == pos);
-      if (!tower) continue;
-      const mult = getDamageMultiplier(e.name, tower.name);
-      const damage = tower.damage * e.hits[pos] * mult;
-      totalDamage += damage;
-      console.log(`  Tower ${tower.name} (${tower.position}): ${e.hits[pos]} hits, Damage: ${damage}`);
-    }
-    const finalDamage = Math.min(totalDamage, e.health);  
-    console.log(`Total Damage: ${finalDamage}`);
-  });
-
-
+  
     return res.json({
-      pathPixels: fullPath.length,
-      towers: towerZones,
-      enemies: result,
-      totalHealth: bestTotalHealth,
-      totalDamage: bestTotalDamage,
-      diff: bestTotalHealth - bestTotalDamage * UPRGRADE_RATIO
+      pathPixels:  fullPath.length,
+      towers:      towerZones,
+      enemies:     result,
+      totalHealth: bestH,
+      totalDamage: bestD,
+      diff:        bestH - bestD * UPRG_RATIO
     });
 
   } catch (err) {
@@ -274,8 +262,6 @@ const target = enemiesInRange.length > 0 ? enemiesInRange[0].enemy : null;
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
-
-
 
 
 function interpolatePath(path, step = 1) {
@@ -299,28 +285,12 @@ function interpolatePath(path, step = 1) {
   return fullPath;
 }
 
-// Función auxiliar para generar el producto cartesiano con repetición
-function cartesianProduct(arr, length) {
-  if (length === 1) return arr.map(e => [e]);
-  const prev = cartesianProduct(arr, length - 1);
-  const result = [];
-  for (const p of prev) {
-    for (const e of arr) {
-      result.push([...p, e]);
-    }
-  }
-  return result;
-}
-
-
 
 function getDamageMultiplier(enemyName, towerName) {
   const damageMultipler = {
     devilOrc: { stoneCannon: 0.5, ironCannon: 0.5, inferno: 2.0 },
-    oculom: { mortar: 0 },
     graySkull: { mortar: 2.0 },
     carrionTropper: { stoneCannon: 0.5, ironCannon: 0.5, inferno: 2.0, mortar: 0.5 },
-    hellBat: { mortar: 0 },
     darkSeer: { stoneCannon: 0.5, ironCannon: 0.5, inferno: 0.5, mortar: 0.75 }
   };
 
