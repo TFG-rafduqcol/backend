@@ -3,7 +3,7 @@ jest.spyOn(console, 'error').mockImplementation(() => {});
 
 const request = require('supertest');
 const app = require('../server');
-const { sequelize, User, Game, FriendShip } = require('../models/index');
+const { sequelize, User, Game, FriendShip, Stats } = require('../models/index');
 const jwt = require('jsonwebtoken');
 const  { authorizedRequestWithOutToken, authorizedRequestWithBadToken } = require('./utils');
 
@@ -212,13 +212,19 @@ describe('POST /api/auth/register', () => {
     };
 
     jest.spyOn(User, 'create').mockResolvedValueOnce(mockCreatedUser);
-
+    jest.spyOn(Stats, 'create').mockResolvedValueOnce({ userId: 1 });
     const res = await request(app)
       .post(ENDPOINT)
       .send(validUserData);
 
     expect(res.status).toBe(201);
     expect(res.body.email).toBe(validUserData.email);
+        expect(Stats.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 1,
+      }),
+      { transaction }
+    );
     expect(transaction.commit).toHaveBeenCalled();
   });
 

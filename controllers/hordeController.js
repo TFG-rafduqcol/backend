@@ -72,49 +72,58 @@ const generateHorde = async (req, res) => {
       });
     }
 
-    function simulateHits(horde) {
-      horde.forEach(e => {
-        e.hits = {};
-        e.healthRemaining = e.health;
-        e.isDead = false;
-      });
+  function simulateHits(horde) {
+    horde.forEach(e => {
+            e.hits = {};
+            e.healthRemaining = e.health;
+            e.isDead = false;
+          });;
+
+      const events = [];
 
       for (const tower of towerZones) {
+        let t = 0;
         const maxT = Math.max(...horde.map(e => fullPath.length / e.speed + e.spawnTime));
-        let nextFire = 0;
-        const step = 0.1;
+        while (t <= maxT) {
+          events.push({ time: t, type: 'fire', tower });
+          t += tower.fire_rate;
+        }
+      }
 
-        for (let t = 0; t <= maxT; t += step) {
-          if (t < nextFire) continue;
+      events.sort((a, b) => a.time - b.time);
 
-          const target = horde.find(e => {
-            if (e.healthRemaining <= 0 || e.spawnTime > t) return false;
-            const dist = (t - e.spawnTime) * e.speed;
-            if (dist >= fullPath.length) return false;
-            const idx   = Math.min(Math.ceil(dist), fullPath.length - 1);
-            const pt    = fullPath[idx];
-            const d2    = Math.hypot(pt.x - tower.x, pt.y - tower.y);
-            if (tower.name === 'mortar' && ['oculom','hellBat'].includes(e.name))
-              return false;
-            return d2 <= tower.range;
-          });
+      for (const event of events) {
+        if (event.type !== 'fire') continue;
 
-          if (!target) continue;
+        const { time, tower } = event;
 
-          target.hits[tower.position] = (target.hits[tower.position] || 0) + 1;
+        const target = horde.find(e => {
+          if (e.healthRemaining <= 0 || e.spawnTime > time) return false;
+          const dist = (time - e.spawnTime) * e.speed;
+          if (dist >= fullPath.length) return false;
 
-          const mult = getDamageMultiplier(target.name, tower.name);
-          const dmg  = tower.damage * mult;
-          target.healthRemaining -= dmg;
-          if (target.healthRemaining <= 0) {
-            target.healthRemaining = 0;
-            target.isDead = true;
-          }
+          const idx = Math.min(Math.ceil(dist), fullPath.length - 1);
+          const pt = fullPath[idx];
+          const d2 = Math.hypot(pt.x - tower.x, pt.y - tower.y);
+          if (tower.name === 'mortar' && ['oculom', 'hellBat'].includes(e.name)) return false;
 
-          nextFire = t + tower.fire_rate;
+          return d2 <= tower.range;
+        });
+
+        if (!target) continue;
+
+        const mult = getDamageMultiplier(target.name, tower.name);
+        const dmg = tower.damage * mult;
+
+        target.hits[tower.position] = (target.hits[tower.position] || 0) + 1;
+        target.healthRemaining -= dmg;
+        if (target.healthRemaining <= 0) {
+          target.healthRemaining = 0;
+          target.isDead = true;
         }
       }
     }
+
 
     const UPRG_RATIO = 1.0;
 

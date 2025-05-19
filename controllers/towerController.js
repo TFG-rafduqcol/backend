@@ -3,6 +3,7 @@ const Game = require('../models/game');
 const Tower = require('../models/tower');
 const Projectile = require('../models/projectile');
 const Upgrade = require('../models/upgrade');
+const Stats = require('../models/stats');
 
 
 
@@ -99,6 +100,16 @@ const deployTower = async (req, res) => {
             upgradeId: newUpgrade.id,
         }, { transaction });
 
+        const stats = await Stats.findOne({ 
+            where: { userId: loggedInUserId },
+            transaction
+        });
+
+        stats.towers_placed += 1;
+        await stats.save({ transaction });
+
+        await game.save({ transaction });
+
         await transaction.commit();
         res.status(200).json({ message: 'Tower deployed successfully', tower: newTower });
     } catch (error) {
@@ -150,6 +161,16 @@ const upgradeTower = async (req, res) => {
         tower.fire_rate += tower.fire_rate * upgrade.range_boost;
         tower.range += tower.range * upgrade.range_boost;
         await tower.save({ transaction });
+
+        const stats = await Stats.findOne({
+            where: { userId: loggedInUserId },
+            transaction
+        });
+
+        stats.towers_placed += 1;
+        await stats.save({ transaction });
+
+        await game.save({ transaction });
 
         await transaction.commit();
         res.status(200).json({ message: 'Tower upgraded successfully', tower });

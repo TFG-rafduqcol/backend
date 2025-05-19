@@ -95,6 +95,10 @@ const registerUser = async (req, res) => {
             rangeId: 1,
         }, { transaction });
 
+        await Stats.create({
+            userId: newUser.id
+        }, { transaction });
+
         await transaction.commit();
         res.status(201).json(newUser);
     } catch (error) {

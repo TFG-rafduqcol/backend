@@ -3,7 +3,7 @@ jest.spyOn(console, 'error').mockImplementation(() => {});
 
 const request = require('supertest');
 const app = require('../server');
-const { sequelize, User } = require('../models/index');
+const { sequelize, User, Stats } = require('../models/index');
 const bcrypt = require('bcryptjs');
 let transaction;
 const jwt = require('jsonwebtoken');
@@ -73,7 +73,6 @@ describe('POST /api/auth/checkEmail', () => {
     expect(transaction.rollback).toHaveBeenCalled();
   });
 });
-
 describe('POST /api/auth/register', () => {
   const ENDPOINT = '/api/auth/register';
   const payload = {
@@ -95,12 +94,37 @@ describe('POST /api/auth/register', () => {
 
   test('201 on success', async () => {
     const newUser = { id: 1, ...payload, isAdmin: false, activeAvatarId: 1, rangeId: 1 };
+    
+
+
     jest.spyOn(User, 'create').mockResolvedValue(newUser);
+    jest.spyOn(Stats, 'create').mockResolvedValue({ userId: newUser.id });
 
     const res = await request(app).post(ENDPOINT).send(payload);
 
     expect(res.status).toBe(201);
     expect(res.body).toEqual(newUser);
+    expect(User.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        firstName: payload.firstName,
+        lastName: payload.lastName,
+        username: payload.username,
+        email: payload.email,
+        password: payload.password,
+        isAdmin: false,
+        activeAvatarId: 1,
+        rangeId: 1,
+      }),
+      { transaction }
+    );
+    
+    expect(Stats.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: newUser.id,
+      }),
+      { transaction }
+    );
+
     expect(transaction.commit).toHaveBeenCalled();
   });
 
@@ -117,6 +141,12 @@ describe('POST /api/auth/register', () => {
     expect(transaction.rollback).toHaveBeenCalled();
   });
 
+  test('400 if required fields are missing', async () => {
+    const res = await request(app).post(ENDPOINT).send({});
+    expect(res.status).toBe(400);
+    expect(res.body.error).toBe('ValidationError');
+  });
+
   test('500 on other error', async () => {
     jest.spyOn(User, 'create').mockRejectedValue(new Error('DB crash'));
 
@@ -126,13 +156,9 @@ describe('POST /api/auth/register', () => {
     expect(res.body.error).toBe('ServerError');
     expect(transaction.rollback).toHaveBeenCalled();
   });
-
-  test('400 if required fields are missing', async () => {
-    const res = await request(app).post(ENDPOINT).send({});
-    expect(res.status).toBe(400);
-    expect(res.body.error).toBeDefined();
-  });
 });
+
+
 
 describe('POST /api/auth/login', () => {
   const ENDPOINT = '/api/auth/login';
@@ -378,7 +404,6 @@ describe('PUT /api/auth/update', () => {
     
     jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser);
     const res = await authenticatedRequest(badPayload);
-    console.log("res", res.body);
 
     expect(res.status).toBe(400);
     expect(transaction.rollback).toHaveBeenCalled();
@@ -428,6 +453,89 @@ describe('PUT /api/auth/update', () => {
 
     expect(res.status).toBe(500);
     expect(res.body.message).toBe('An error occurred while updating the user.');
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
+});
+describe('GET /api/auth/stats/:id', () => {
+  const ENDPOINT = (id) => `/api/auth/stats/${id}`;
+  const user = { id: 1, isAdmin: false };
+
+  const mockStats = {
+    userId: 1,
+    gamesPlayed: 50,
+    wins: 25,
+    losses: 20,
+    draws: 5,
+  };
+
+  let transaction;
+
+  beforeAll(() => {
+    transaction = { commit: jest.fn(), rollback: jest.fn() };
+    jest.spyOn(sequelize, 'transaction').mockResolvedValue(transaction);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  beforeEach(() => {
+    app.use((req, res, next) => {
+      req.userId = 1;
+      next();
+    });
+  });
+
+  const authenticatedRequest = async (id) => {
+    const token = jwt.sign(user, process.env.JWT_SECRET, { expiresIn: '1h' });
+    return request(app)
+      .get(ENDPOINT(id))
+      .set('Authorization', `Bearer ${token}`);
+  };
+
+  test('200 - Successfully returns user stats', async () => {
+    jest.spyOn(Stats, 'findOne').mockResolvedValue(mockStats);
+
+    const res = await authenticatedRequest(mockStats.userId);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(mockStats);
+    expect(transaction.commit).toHaveBeenCalled();
+  });
+
+  test('401 - Missing token', async () => {
+    const res = await request(app).get(ENDPOINT(1)); 
+
+    expect(res.status).toBe(401);
+    expect(res.body.message).toBe('Token is missing');
+  });
+
+  test('403 - Unauthorized user (invalid token)', async () => {
+    const res = await request(app)
+      .get(ENDPOINT(1))
+      .set('Authorization', 'Bearer invalidtoken');
+
+    expect(res.status).toBe(403);
+    expect(res.body.message).toBe('Invalid or expired token');
+  });
+
+  test('404 - User stats not found', async () => {
+    jest.spyOn(Stats, 'findOne').mockResolvedValue(null);
+
+    const res = await authenticatedRequest(999);
+
+    expect(res.status).toBe(404);
+    expect(res.body.message).toBe('User stats not found');
+    expect(transaction.rollback).toHaveBeenCalled();
+  });
+
+  test('500 - Internal server error', async () => {
+    jest.spyOn(Stats, 'findOne').mockRejectedValue(new Error('DB error'));
+
+    const res = await authenticatedRequest(1);
+
+    expect(res.status).toBe(500);
+    expect(res.body.message).toBe('Internal server error');
     expect(transaction.rollback).toHaveBeenCalled();
   });
 });

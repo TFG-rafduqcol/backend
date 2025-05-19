@@ -4,6 +4,7 @@ const Avatar = require('../models/avatar');
 const bcrypt = require('bcryptjs'); 
 const jwt = require('jsonwebtoken');
 const Range = require('../models/range');
+const Stats = require('../models/stats');
 
 require('dotenv').config();
 
@@ -63,6 +64,11 @@ const registerPlayer = async (req, res) => {
       activeAvatarId: 1,
       rangeId: 1,
     }, { transaction }); 
+
+    await Stats.create({
+      userId: newUser.id
+    }, { transaction });
+
 
     await transaction.commit();
 
@@ -287,5 +293,29 @@ const updateUser = async (req, res) => {
   }
 }
 
+const getUserStats = async (req, res) => {
+    const transaction = await sequelize.transaction();
+    try {
+      const userId = req.params.id;
 
-module.exports = { checkEmail, registerPlayer, loginUser, updateUser };
+      const stats = await Stats.findOne({
+        where: { userId },
+        transaction
+      });
+
+      if (!stats) {
+        await transaction.rollback();
+        return res.status(404).json({ message: "User stats not found" });
+      }
+
+      await transaction.commit();
+      return res.status(200).json(stats);
+    } catch (error) {
+      await transaction.rollback();
+      console.error("Error fetching user stats:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+module.exports = { checkEmail, registerPlayer, loginUser, updateUser, getUserStats };

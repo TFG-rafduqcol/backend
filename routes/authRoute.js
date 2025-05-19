@@ -1,5 +1,5 @@
 const express = require('express');
-const { checkEmail, registerPlayer, loginUser, updateUser } = require('../controllers/authController'); 
+const { checkEmail, registerPlayer, loginUser, updateUser, getUserStats } = require('../controllers/authController'); 
 const authenticateToken = require('../middlewares/authMiddleware');
 
 const router = express.Router();
@@ -180,5 +180,30 @@ router.post('/login', loginUser);
  *       - bearerAuth: []  # Aquí indicamos que se necesita el token para este endpoint
  */
 router.put('/update/:id', authenticateToken, updateUser);
+
+/**
+ * @swagger
+ * /api/auth/stats/{id}:
+ *   get:
+ *     tags:
+ *       - Auth
+ *     summary: Get user statistics
+ *     description: Retrieves the statistics of a user by their ID.
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the user whose statistics to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: User statistics successfully retrieved
+ *       404:
+ *         description: User not found
+ *       401:
+ *         description: Unauthorized access - Token missing or invalid
+ */
+router.get('/stats/:id', authenticateToken, getUserStats);
 
 module.exports = router;

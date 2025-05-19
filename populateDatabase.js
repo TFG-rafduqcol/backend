@@ -6,6 +6,7 @@ const Range = require('./models/range');
 const Tower = require('./models/tower');
 const Projectile = require('./models/projectile');
 const Enemy = require('./models/enemy');
+const Stats = require('./models/stats');
 
 const Avatars = [
     { id: 1, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_1.jpeg' },
@@ -30,8 +31,8 @@ const usersData = [
     {
         firstName: 'Rafa',
         lastName: 'Duque',
-        username: 'Gafa',
-        email: 'gafa@email.com',
+        username: 'Rafa',
+        email: 'rafa@email.com',
         password: '$2b$10$.WahX65e87xtCCrcbV5l8ufr/e7pAnXXapSb.xXyB7BHkI1leKq7W',
         experience: 5000,
         gold: 100,
@@ -220,6 +221,54 @@ const enemiesData = [
 ]
     
 
+const statsData = [
+  {
+    userId: 1,
+    enemies_killed: 150,
+    towers_placed: 45,
+    gold_earned: 12000,
+    gems_earned: 30,
+    rounds_passed: 25,
+    games_played: 10
+  },
+  {
+    userId: 2,
+    enemies_killed: 80,
+    towers_placed: 20,
+    gold_earned: 6000,
+    gems_earned: 10,
+    rounds_passed: 12,
+    games_played: 5
+  },
+  {
+    userId: 3,
+    enemies_killed: 300,
+    towers_placed: 70,
+    gold_earned: 20000,
+    gems_earned: 50,
+    rounds_passed: 40,
+    games_played: 20
+  },
+  {
+    userId: 4,
+    enemies_killed: 0,
+    towers_placed: 5,
+    gold_earned: 800,
+    gems_earned: 0,
+    rounds_passed: 2,
+    games_played: 1
+  },
+  {
+    userId: 5,
+    enemies_killed: 120,
+    towers_placed: 33,
+    gold_earned: 10000,
+    gems_earned: 25,
+    rounds_passed: 18,
+    games_played: 9
+  }
+];
+
  
 
 
@@ -260,6 +309,9 @@ const populateDatabase = async () => {
             const user = await User.findByPk(userId);
             await user.addAvatar(avatarId);
           }
+
+        const stats = await Stats.bulkCreate(statsData, { returning: true });
+        console.log('Stats created:', stats.length);
 
     } catch (error) {
         console.error('Error populating the database:', error);

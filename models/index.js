@@ -11,6 +11,7 @@ const Upgrade = require('./upgrade');
 const Avatar = require('./avatar');
 const Range = require('./range');
 const FriendShip = require('./friendShip');
+const Stats = require('./stats');
 
 
 User.hasMany(Game);
@@ -85,4 +86,16 @@ Avatar.belongsToMany(User, {
   otherKey: 'userId'
 });
 
-module.exports = { sequelize, User, Game, Wave, Tower, Projectile, Upgrade, Enemy, Range, Avatar, FriendShip };
+//Stats: A user can have one stats, and a stats can belong to one user
+User.hasOne(Stats, {
+  foreignKey: 'userId',
+  as: 'stats', 
+  onDelete: 'CASCADE',
+});
+
+Stats.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
+module.exports = { sequelize, User, Game, Wave, Tower, Projectile, Upgrade, Enemy, Range, Avatar, FriendShip, Stats };
