@@ -209,16 +209,17 @@ const towersData = [
 
 
 const enemiesData = [
-    { id: 1, name: 'daggerkin', level:1, health: 40, speed: 30, lifes: 1, resistante: null, avatar: '' },
-    { id: 2, name: 'orcutter', level:2, health: 60, speed: 15, lifes: 1,resistante: null, avatar: '' },
-    { id: 3, name: 'oculom', level:3, health: 40, speed: 25, lifes: 1,resistante: null, avatar: '' },
-    { id: 4, name: 'devilOrc', level:4, health: 90, speed: 12, lifes: 1,resistante: null, avatar: '' },
-    { id: 5, name: 'graySkull', level:5, health: 140, speed: 8, lifes: 3,resistante: null, avatar: '' },
-    { id: 6, name: 'carrionTropper', level:6, health: 90, speed: 14, lifes: 2, resistante: null, avatar: '' },
-    { id: 7, name: 'hellBat', level:7, health: 90, speed: 17, lifes: 2,resistante: null, avatar: '' },
-    { id: 8, name: 'hexLord', level:8, health: 90, speed: 17, lifes: 4,resistante: null, avatar: '' },
-    { id: 9, name: 'darkSeer', level:9, health: 140, speed: 10, lifes: 5,resistante: null, avatar: '' },
-]
+    { id: 1, name: 'daggerkin', level: 1, health: 40, speed: 30, lifes: 1, gold: 10, avatar: '' },
+    { id: 2, name: 'orcutter', level: 2, health: 60, speed: 15, lifes: 1, gold: 12, avatar: '' },
+    { id: 3, name: 'oculom', level: 3, health: 40, speed: 25, lifes: 1, gold: 10, avatar: '' },
+    { id: 4, name: 'devilOrc', level: 4, health: 90, speed: 12, lifes: 1, gold: 15, avatar: '' },
+    { id: 5, name: 'graySkull', level: 5, health: 140, speed: 8, lifes: 3, gold: 25, avatar: '' },
+    { id: 6, name: 'carrionTropper', level: 6, health: 90, speed: 14, lifes: 2, gold: 20, avatar: '' },
+    { id: 7, name: 'hellBat', level: 7, health: 90, speed: 17, lifes: 2, gold: 15, avatar: '' },
+    { id: 8, name: 'hexLord', level: 8, health: 90, speed: 17, lifes: 4, gold: 20, avatar: '' },
+    { id: 9, name: 'darkSeer', level: 9, health: 140, speed: 10, lifes: 5, gold: 30, avatar: '' },
+];
+
     
 
 const statsData = [

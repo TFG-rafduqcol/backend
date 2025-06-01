@@ -50,9 +50,13 @@ const Enemy = sequelize.define(
                 max: 999,
             },
         },
-        resistance: {
-            type: DataTypes.ENUM(...STROKE_TYPES),
-            allowNull: true,
+        gold: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: {
+                min: 0,
+                max: 100,
+            },
         },
         avatar: {
             type: DataTypes.JSON,

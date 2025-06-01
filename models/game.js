@@ -21,11 +21,11 @@ const Game = sequelize.define("Game", {
     round: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        defaultValue: 1,
+        defaultValue: 0,
     },
     gold: {
         type: DataTypes.INTEGER,
-        defaultValue: 500,
+        defaultValue: 350,
         validate: {
           min: 0,
           max: 1000000,

@@ -51,6 +51,6 @@ const router = express.Router();
  *         description: Error interno del servidor.
  */
 
-router.post('/generateHorde/:gameId', generateHorde);
+router.post('/generateHorde/:gameId', authenticateToken, generateHorde);
 
 module.exports = router;
