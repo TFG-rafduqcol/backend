@@ -13,8 +13,8 @@ describe('GET /api/social/getUserByUsernameOrId/:usernameOrId', () => {
   const mockFriend = {
       id: 2,
       username: 'jhone_doe_friend',
-      active_avatar: { image_url: 'http://example.com/avatar_friend.jpg' },
-      range: { name: 'Silver', image_url: 'http://example.com/range_friend.jpg' }
+      active_avatar: { image_url: 'https://example.com/avatar_friend.jpg' },
+      range: { name: 'Silver', image_url: 'https://example.com/range_friend.jpg' }
   };
   
 
@@ -93,8 +93,8 @@ describe('GET /api/social/getUserById/:userId', () => {
     id: 1,
     username: 'john_doe',
     experience: 1500,
-    active_avatar: { image_url: 'http://example.com/avatar.jpg' },
-    range: { name: 'Gold', image_url: 'http://example.com/range.jpg' }
+    active_avatar: { image_url: 'https://example.com/avatar.jpg' },
+    range: { name: 'Gold', image_url: 'https://example.com/range.jpg' }
   };
 
   let transaction;
@@ -126,9 +126,9 @@ describe('GET /api/social/getUserById/:userId', () => {
     expect(res.body.player).toEqual({
       id: 1,
       username: 'john_doe',
-      avatar: 'http://example.com/avatar.jpg',
+      avatar: 'https://example.com/avatar.jpg',
       range: 'Gold',
-      range_url: 'http://example.com/range.jpg',
+      range_url: 'https://example.com/range.jpg',
       experience: 1500
     });
   });
@@ -176,13 +176,13 @@ describe('GET /api/social/getMyFriends', () => {
       id: 1,
       username: 'john_doe',
       experience: 1500,
-      active_avatar: { image_url: 'http://example.com/avatar.jpg' },
+      active_avatar: { image_url: 'https://example.com/avatar.jpg' },
     },
     user2: {
       id: 2,
       username: 'friend_user',
       experience: 900,
-      active_avatar: { image_url: 'http://example.com/friend_avatar.jpg' },
+      active_avatar: { image_url: 'https://example.com/friend_avatar.jpg' },
     }
   };
 
@@ -214,7 +214,7 @@ describe('GET /api/social/getMyFriends', () => {
     expect(res.body.friends[0]).toEqual({
       id: 2,
       username: 'friend_user',
-      avatar: 'http://example.com/friend_avatar.jpg',
+      avatar: 'https://example.com/friend_avatar.jpg',
     });
     expect(transaction.commit).toHaveBeenCalled();
   });
@@ -275,8 +275,8 @@ describe('GET /api/social/getMyFriendRequests', () => {
       id: 2,
       username: 'inviter_user',
       experience: 1200,
-      active_avatar: { image_url: 'http://example.com/avatar.jpg' },
-      range: { name: 'Gold', image_url: 'http://example.com/gold.png' }
+      active_avatar: { image_url: 'https://example.com/avatar.jpg' },
+      range: { name: 'Gold', image_url: 'https://example.com/gold.png' }
     }
   };
 
@@ -308,9 +308,9 @@ describe('GET /api/social/getMyFriendRequests', () => {
     expect(res.body.users[0]).toEqual({
       id: 2,
       username: 'inviter_user',
-      avatar: 'http://example.com/avatar.jpg',
+      avatar: 'https://example.com/avatar.jpg',
       range: 'Gold',
-      range_url: 'http://example.com/gold.png',
+      range_url: 'https://example.com/gold.png',
     });
     expect(transaction.commit).toHaveBeenCalled();
   });

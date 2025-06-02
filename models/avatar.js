@@ -11,7 +11,7 @@ const Avatar = sequelize.define(
         },
         image_url: {
             type: DataTypes.STRING,
-            defaultValue: "http://127.0.0.1:8000/www/images/avatar_1.jpeg"
+            defaultValue: "https://127.0.0.1:8000/www/images/avatar_1.jpeg"
         },
         gems: {
             type: DataTypes.INTEGER,
