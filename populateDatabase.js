@@ -9,17 +9,17 @@ const Enemy = require('./models/enemy');
 const Stats = require('./models/stats');
 
 const Avatars = [
-    { id: 1, image_url: '/images/avatars/avatar_1.jpeg' },
-    { id: 2, image_url: '/images/avatars/avatar_2.png' },
-    { id: 3, image_url: '/images/avatars/avatar_3.png' },
-    { id: 4, image_url: '/images/avatars/avatar_4.png' },
-    { id: 5, image_url: '/images/avatars/avatar_5.png' },
-    { id: 6, image_url: '/images/avatars/avatar_6.png' },
-    { id: 7, image_url: '/images/avatars/avatar_7.png' },
-    { id: 8, image_url: '/images/avatars/avatar_8.png' },
-    { id: 9, image_url: '/images/avatars/avatar_9.png' },
-    { id: 10, image_url: '/images/avatars/avatar_10.png' },
-    { id: 11, image_url: '/images/avatars/avatar_11.png' },
+    { id: 1, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_1.jpeg' },
+    { id: 2, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_2.png' },
+    { id: 3, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_3.png' },
+    { id: 4, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_4.png' },
+    { id: 5, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_5.png' },
+    { id: 6, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_6.png' },
+    { id: 7, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_7.png' },
+    { id: 8, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_8.png' },
+    { id: 9, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_9.png' },
+    { id: 10, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_10.png' },
+    { id: 11, image_url: 'http://127.0.0.1:8000/www/images/avatars/avatar_11.png' },
 ];
 
 const Ranges = [

@@ -68,8 +68,6 @@ const generateHorde = async (req, res) => {
     const game = await Game.findOne({ where: { id: gameId } });
     const gameGold = game.gold + earnedGold; 
     let gameRound = game.round;  
-    console.log("gameGold:", game.gold, "earnedGold:", earnedGold);
-    console.log("gameRound:", gameRound);
     
     
     function randomHorde() {
@@ -316,7 +314,9 @@ function getDamageMultiplier(enemyName, towerName) {
     devilOrc: { stoneCannon: 0.5, ironCannon: 0.5, inferno: 2.0 },
     graySkull: { mortar: 2.0 },
     carrionTropper: { stoneCannon: 0.5, ironCannon: 0.5, inferno: 2.0, mortar: 0.5 },
-    darkSeer: { stoneCannon: 0.5, ironCannon: 0.5, inferno: 0.5, mortar: 0.75 }
+    darkSeer: { stoneCannon: 0.5, ironCannon: 0.5, inferno: 0.5, mortar: 0.75 },
+    hellBat: { 1: 1, 2: 1, 3: 0.5 },   
+
   };
 
   if (enemyName in damageMultipler && towerName in damageMultipler[enemyName]) {
