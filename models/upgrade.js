@@ -24,19 +24,19 @@ const Upgrade = sequelize.define("Upgrade", {
         },
     },
     damage_boost: {
-        type: DataTypes.DOUBLE,
+        type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
             min: 0,
-            max: 1,
+            max: 10,
         },
     },
     range_boost: {
-        type: DataTypes.DOUBLE,
+        type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
             min: 0,
-            max: 1,
+            max: 100,
         },
     },
     fire_rate_boost: {

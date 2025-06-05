@@ -58,7 +58,6 @@ const deployTower = async (req, res) => {
             return res.status(400).json({ error: 'Not enough gold to deploy this tower' });
         }
 
-        game.gold -= towerProperties[name].cost;
         await game.save({ transaction });
         const projectile = await Projectile.findOne({
             where: { name: towerProperties[name].projectile_type },
@@ -72,15 +71,15 @@ const deployTower = async (req, res) => {
         }
 
         const upgrades = {
-            stoneCannon: { cost: 100, damage_boost: 0.01, range_boost: 0.015, fire_rate_boost: 0.015 },
-            ironCannon: { cost: 125, damage_boost: 0.02, range_boost: 0.01, fire_rate_boost: 0.01 },
-            inferno: { cost: 150, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
-            mortar: { cost: 120, damage_boost: 0.03, range_boost: 0.02, fire_rate_boost: 0.005 },
+            stoneCannon: { cost: 100, damage_boost: 1, range_boost: 50, fire_rate_boost: 0.1 },
+            ironCannon: { cost: 125, damage_boost: 2, range_boost: 50, fire_rate_boost: 0.1 },
+            inferno: { cost: 150, damage_boost: 2, range_boost: 50, fire_rate_boost: 0.1 },
+            mortar: { cost: 120, damage_boost: 3, range_boost: 50, fire_rate_boost: 0.1 },
 
         };
 
         const newUpgrade = await Upgrade.create({
-            level: 0,
+            level: 1,
             cost: upgrades[name].cost,
             damage_boost: upgrades[name].damage_boost,
             range_boost: upgrades[name].range_boost,
@@ -99,21 +98,22 @@ const deployTower = async (req, res) => {
             projectileId: projectile.id,
             upgradeId: newUpgrade.id,
         }, { transaction });
-
+        
         const stats = await Stats.findOne({ 
             where: { userId: loggedInUserId },
             transaction
         });
 
         stats.towers_placed += 1;
-        await stats.save({ transaction });
-
-        await game.save({ transaction });
-
+        await stats.save({ transaction });    
         await transaction.commit();
-        res.status(200).json({ message: 'Tower deployed successfully', tower: newTower });
+        res.status(200).json({ message: 'Tower deployed successfully', tower: newTower, upgrade: newUpgrade });
     } catch (error) {
-        await transaction.rollback(); 
+        try {
+            await transaction.rollback();
+        } catch (rollbackError) {
+            console.error('Error during transaction rollback:', rollbackError);
+        }
         res.status(500).json({ error: 'Failed to deploy tower', details: error.message });
     }
 };
@@ -136,30 +136,26 @@ const upgradeTower = async (req, res) => {
             return res.status(404).json({ error: 'Game not found or user not authorized' });
         }
 
+
         const upgrade = await Upgrade.findByPk(tower.upgradeId);
         if (game.gold < upgrade.cost) {
             return res.status(400).json({ error: 'Not enough gold to upgrade this tower' });
         }
 
-        const porcentaje = (tower.cost * 0.1) * (upgrade.level || 1) / 100;
-        const newLevel = upgrade.level + 1;
-        const upgradeCost = upgrade.cost;
-        const newUpgradeCost =  upgradeCost + upgradeCost * porcentaje;
+        if ( upgrade.level === 10){
+            return res.status(400).json({ error: 'Tower is already at maximum level' });
+        }
 
-        game.gold -= upgradeCost;
+        const newLevel = upgrade.level + 1;
         await game.save({ transaction });
 
-        upgrade.level = newLevel;
-        upgrade.cost = newUpgradeCost;
-        upgrade.damage_boost += upgrade.damage_boost * newLevel;
-        upgrade.range_boost += upgrade.range_boost * newLevel;
-        upgrade.fire_rate_boost += upgrade.fire_rate_boost * newLevel;
-        await upgrade.save({ transaction });
 
-        tower.cost += upgradeCost;
-        tower.damage += tower.damage * upgrade.damage_boost;
-        tower.fire_rate += tower.fire_rate * upgrade.range_boost;
-        tower.range += tower.range * upgrade.range_boost;
+        upgrade.level = newLevel;
+        await upgrade.save({ transaction });     
+        tower.cost += upgrade.cost;
+        tower.damage += tower.damage + upgrade.damage_boost;
+        tower.fire_rate += tower.fire_rate + upgrade.fire_rate_boost;
+        tower.range += tower.range + upgrade.range_boost;
         await tower.save({ transaction });
 
         const stats = await Stats.findOne({
@@ -167,7 +163,8 @@ const upgradeTower = async (req, res) => {
             transaction
         });
 
-        stats.towers_placed += 1;
+        
+        stats.towers_upgraded = stats.towers_upgraded ? stats.towers_upgraded + 1 : 1;
         await stats.save({ transaction });
 
         await game.save({ transaction });
