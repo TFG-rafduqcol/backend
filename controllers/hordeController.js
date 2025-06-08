@@ -79,7 +79,12 @@ const generateHorde = async (req, res) => {
       }
 
     let UPRG_RATIO = 1;
-    if ( gameRound > 1 )  UPRG_RATIO +=  Math.min(gameGold / 100, 1); 
+    console.log("Ronda del juego:", gameRound);
+    if (gameRound > 1 && gameGold > 120) {
+      UPRG_RATIO += Math.min(gameGold / 1000, 1);
+    } else if (gameRound <= 1) {
+      UPRG_RATIO = 0.85;
+    }
     gameRound++;
 
     // Función fitness
@@ -199,6 +204,8 @@ const generateHorde = async (req, res) => {
 
       // Printear cuantos hits le dan a cada enemigo y cuanto daño le hacen
       console.log('Best Horde values: \n Best Health:', bestH, '\n Best Damage:', bestD);
+      //Printeamos el valor del ratio 
+      console.log('UPRG_RATIO:', UPRG_RATIO);
 
       // Impactos en cada enemigo
       best.forEach(e => {

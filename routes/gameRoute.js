@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createGame, getGameById, updateGame} = require('../controllers/gameController');
+const { createGame, getGameById, updateGame, endGame } = require('../controllers/gameController');
 const authenticateToken = require('../middlewares/authMiddleware');
 
 
@@ -175,5 +175,54 @@ router.get('/getGame/:gameId', authenticateToken, getGameById);
  */
 
 router.put('/updateGame/:gameId', authenticateToken, updateGame);
+
+/**
+ * @swagger
+ * /api/games/endGame/{gameId}:
+ *   post:
+ *     tags:
+ *       - Game
+ *     summary: End a game session and process rewards
+ *     description: Marks a game as completed, calculates rewards, and updates user rank if necessary.
+ *     parameters:
+ *       - in: path
+ *         name: gameId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The ID of the game session to end.
+ *     responses:
+ *       200:
+ *         description: Game ended successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Game ended successfully"
+ *                 round:
+ *                   type: integer
+ *                   example: 52
+ *                 xpEarned:
+ *                   type: integer
+ *                   example: 10400
+ *                 gemsEarned:
+ *                   type: integer
+ *                   example: 52
+ *                 newRank:
+ *                   type: string
+ *                   example: "Master"
+ *       403:
+ *         description: Forbidden – the game does not belong to the authenticated user
+ *       404:
+ *         description: Game or user not found
+ *       401:
+ *         description: Unauthorized – token missing or invalid
+ *       500:
+ *         description: Internal server error
+ */
+router.post('/endGame/:gameId', authenticateToken, endGame);
 
 module.exports = router;

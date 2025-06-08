@@ -71,10 +71,10 @@ const deployTower = async (req, res) => {
         }
 
         const upgrades = {
-            stoneCannon: { cost: 100, damage_boost: 1, range_boost: 50, fire_rate_boost: 0.1 },
-            ironCannon: { cost: 125, damage_boost: 2, range_boost: 50, fire_rate_boost: 0.1 },
-            inferno: { cost: 150, damage_boost: 2, range_boost: 50, fire_rate_boost: 0.1 },
-            mortar: { cost: 120, damage_boost: 3, range_boost: 50, fire_rate_boost: 0.1 },
+            stoneCannon: { cost: 100, damage_boost: 1, range_boost: 10, fire_rate_boost: 0.1 },
+            ironCannon: { cost: 125, damage_boost: 2, range_boost: 10, fire_rate_boost: 0.1 },
+            inferno: { cost: 150, damage_boost: 2, range_boost: 10, fire_rate_boost: 0.1 },
+            mortar: { cost: 120, damage_boost: 3, range_boost: 10, fire_rate_boost: 0.1 },
 
         };
 
@@ -153,9 +153,9 @@ const upgradeTower = async (req, res) => {
         upgrade.level = newLevel;
         await upgrade.save({ transaction });     
         tower.cost += upgrade.cost;
-        tower.damage += tower.damage + upgrade.damage_boost;
-        tower.fire_rate += tower.fire_rate + upgrade.fire_rate_boost;
-        tower.range += tower.range + upgrade.range_boost;
+        tower.damage += upgrade.damage_boost;
+        tower.fire_rate += upgrade.fire_rate_boost;
+        tower.range += upgrade.range_boost;
         await tower.save({ transaction });
 
         const stats = await Stats.findOne({
