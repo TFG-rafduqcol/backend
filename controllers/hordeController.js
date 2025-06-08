@@ -68,6 +68,7 @@ const generateHorde = async (req, res) => {
     const game = await Game.findOne({ where: { id: gameId } });
     const gameGold = game.gold + earnedGold; 
     let gameRound = game.round;  
+    const isHardMode = game.isHardMode;
     
     
     function randomHorde() {
@@ -92,7 +93,11 @@ const generateHorde = async (req, res) => {
       for (let i = 0; i < horde.length; i++) {
         horde[i].spawnTime = i * spacingTime;
       }
-      simulateHits(horde, towerZones, fullPath);
+      if (isHardMode) {
+        simulateHitsStepwise(horde, towerZones, fullPath);
+      } else {
+        simulateHits(horde, towerZones, fullPath);
+      }
 
       let totalHealth = 0;
       for (let i = 0; i < horde.length; i++) {
@@ -180,7 +185,11 @@ const generateHorde = async (req, res) => {
 
       const best = population.reduce((b, c) => fitness(c) > fitness(b) ? c : b);
       best.forEach((e, i) => e.spawnTime = i * spacingTime);
-      simulateHits(best, towerZones, fullPath);
+      if (isHardMode) {
+        simulateHitsStepwise(best, towerZones, fullPath);
+      } else {
+        simulateHits(best, towerZones, fullPath);
+      }
 
       const result = best.map((e, i) => ({
         id:         i + 1,
@@ -314,7 +323,66 @@ function simulateHits(horde, towerZones, fullPath) {
       }
     }
 
+function simulateHitsStepwise(horde, towerZones, fullPath) {
+  horde.forEach(enemy => {
+    enemy.hits = {};
+    enemy.healthRemaining = enemy.health;
+    enemy.isDead = false;
+  });
 
+  towerZones.forEach(tower => {
+    const maxT = Math.max(
+      ...horde.map(e => fullPath.length / e.speed + e.spawnTime)
+    );
+
+    let nextFire = 0;
+
+    for (let t = 0.0; t <= maxT; t += 0.1) {
+      if (t < nextFire) continue;
+
+    const enemiesInRange = horde
+  .filter(e => {
+    if (e.healthRemaining <= 0 || e.spawnTime > t) return false;
+
+    const dist = (t - e.spawnTime) * e.speed;
+    if (dist >= fullPath.length) return false;
+
+    const index = Math.min(Math.ceil(dist), fullPath.length - 1);
+    const point = fullPath[index];
+    const dx = point.x - tower.x;
+    const dy = point.y - tower.y;
+    const d = Math.hypot(dx, dy);
+
+    const isFlying = ['oculom', 'hellBat'].includes(e.name);
+    if (tower.name === 'mortar' && isFlying) return false;
+
+    return d <= tower.range;
+  })
+  .map(e => ({
+    enemy: e,
+    distanceTraveled: (t - e.spawnTime) * e.speed
+  }))
+  .sort((a, b) => b.distanceTraveled - a.distanceTraveled); 
+
+const target = enemiesInRange.length > 0 ? enemiesInRange[0].enemy : null;
+
+      if (target) {
+        target.hits[tower.position] = (target.hits[tower.position] || 0) + 1;
+
+        const mult = getDamageMultiplier(target.name, tower.name);
+        const realDamage = tower.damage * mult;
+        target.healthRemaining -= realDamage;
+
+        if (target.healthRemaining <= 0) {
+          target.healthRemaining = 0;
+          target.isDead = true;
+        }
+
+        nextFire = t + tower.fire_rate;
+      }
+    }
+  });
+}
 
 function getDamageMultiplier(enemyName, towerName) {
   const damageMultipler = {

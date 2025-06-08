@@ -39,6 +39,9 @@ const Avatars = [
 
 const Ranges = [
     { id: 1, name: 'Master', image_url: '/images/master.png' },
+    { id: 2, name: 'Gold', image_url: '/images/gold.png' },
+    { id: 3, name: 'Silver', image_url: '/images/silver.png' },
+
 ];
 
 
@@ -54,7 +57,7 @@ const usersData = [
         gems: 20,
         gameId: 1,
         activeAvatarId: 1, 
-        rangeId: 1,
+        rangeId: 2,
 
     },
     {

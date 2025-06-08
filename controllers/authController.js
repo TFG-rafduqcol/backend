@@ -62,7 +62,7 @@ const registerPlayer = async (req, res) => {
       password,
       isAdmin: false,
       activeAvatarId: 1,
-      rangeId: 1,
+      rangeId: 3,
     }, { transaction }); 
 
     await Stats.create({

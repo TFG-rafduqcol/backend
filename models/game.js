@@ -39,6 +39,10 @@ const Game = sequelize.define("Game", {
           max: 20,
         },
       },
+      hardMode: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
 
 }   , {
     timestamps: true, 

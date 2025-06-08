@@ -6,10 +6,11 @@ const createGame = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
       const loggedUserId = req.userId;
-      const { path } = req.body;
+      const { path, hardMode } = req.body;
   
       const game = await Game.create({
         path,
+        hardMode,
         UserId: loggedUserId,
       }, { transaction });
   
