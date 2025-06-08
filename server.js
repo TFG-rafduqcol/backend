@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const http = require('http');
+const https = require('https');
 const path = require('path');
 const cors = require('cors');
 const sequelize = require('./config/db');
@@ -91,13 +92,32 @@ app.get('/', (req, res) => {
     res.send('Servidor corriendo');
 });
 
-const PORT = process.env.PORT || 3000;
+const HTTPS_PORT = 3443;
+const HTTP_PORT = process.env.PORT || 3000;
+
+// HTTPS options
+const certDir = path.join(__dirname, 'certificates');
+const httpsOptions = {
+  key: fs.existsSync(path.join(certDir, 'key.pem')) ? fs.readFileSync(path.join(certDir, 'key.pem')) : undefined,
+  cert: fs.existsSync(path.join(certDir, 'cert.pem')) ? fs.readFileSync(path.join(certDir, 'cert.pem')) : undefined
+};
 
 // Solo HTTP, ignora certificados
 if (process.env.NODE_ENV !== 'test' && process.env.JEST_WORKER_ID === undefined) {
-    http.createServer(app).listen(PORT, () => {
-        console.log(`Servidor HTTP escuchando en http://0.0.0.0:${PORT}`);
-        console.log(`📱 Accede desde dispositivos en la misma red usando: http://${getIPAddress()}:${PORT}`);
+    // Servidor HTTPS
+    if (httpsOptions.key && httpsOptions.cert) {
+        https.createServer(httpsOptions, app).listen(HTTPS_PORT, () => {
+            console.log(`Servidor HTTPS escuchando en https://0.0.0.0:${HTTPS_PORT}`);
+            console.log(`📱 Accede desde dispositivos en la misma red usando: https://${getIPAddress()}:${HTTPS_PORT}`);
+            console.log('Swagger UI available at: https://localhost:3443/api-docs');
+        });
+    } else {
+        console.warn('Certificados SSL no encontrados. Solo se iniciará HTTP.');
+    }
+    // Servidor HTTP (opcional, para desarrollo)
+    http.createServer(app).listen(HTTP_PORT, () => {
+        console.log(`Servidor HTTP escuchando en http://0.0.0.0:${HTTP_PORT}`);
+        console.log(`📱 Accede desde dispositivos en la misma red usando: http://${getIPAddress()}:${HTTP_PORT}`);
         console.log('Swagger UI available at: http://localhost:3000/api-docs');
     });
 }
@@ -113,7 +133,7 @@ if (require.main === module) {
 
             return populateDatabase();
         })        .then(() => {
-            console.log(`🚀 Servidor corriendo en http://0.0.0.0:${PORT}`);
+            console.log(`🚀 Servidor corriendo en http://0.0.0.0:${HTTPS_PORT}`);
             console.log(`📱 Accede desde dispositivos en la misma red usando: http://${getIPAddress()}:${PORT}`);
             console.log('Swagger UI available at: http://localhost:3000/api-docs');
         })
