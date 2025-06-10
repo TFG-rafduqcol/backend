@@ -198,8 +198,10 @@ describe('POST /api/auth/register', () => {
     lastName: 'Doe',
     username: 'johndoe',
     email: 'john@example.com',
-    role: 1,
-    password: 'password123'
+    password: 'Rafa1234', 
+    isAdmin: false,
+    activeAvatarId: 1,
+    rangeId: 1
   };
 
   test('201 - User registered successfully', async () => {

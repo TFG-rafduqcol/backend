@@ -4,13 +4,16 @@ const Tower = require('../models/tower');
 const Projectile = require('../models/projectile');
 const Enemy = require('../models/enemy');
 const Upgrade = require('../models/upgrade');
+const HordeQualityLog = require('../models/hordeQualityLog');
+
 const { json } = require('sequelize');
+const hordeQualityLog = require('../models/hordeQualityLog');
 
 
 
 const generateHorde = async (req, res) => {
   const { gameId } = req.params;
-  const { earnedGold } = req.body;  
+  const { earnedGold, lostedLives } = req.body;  
   const spacingTime   = 1.5;  // segundos entre enemigos
   const MAX_HORDE_SIZE = 10;
   const POPULATION_SIZE = 30;
@@ -43,6 +46,38 @@ const generateHorde = async (req, res) => {
   ];
 
   try {
+   
+    const game = await Game.findOne({ where: { id: gameId } });
+    let gameRound = game.round;  
+
+    if (gameRound > 0) {
+
+        const hordeQualityLog = await HordeQualityLog.findOne({
+          where: {
+            gameId,
+            round: gameRound
+          }
+        });
+
+        let hordeQuality = 100;
+        const HIGH_ROUND = 40;
+        const MID_ROUND = 25;
+        const MANY_LIVES = 5; 
+
+        if (lostedLives && lostedLives >= MANY_LIVES && gameRound < MID_ROUND) {
+          hordeQuality -= lostedLives * 5; 
+        }
+        if (lostedLives && lostedLives >= MANY_LIVES && gameGold < 100) {
+          hordeQuality -= lostedLives * 4; 
+        }
+        if (lostedLives && lostedLives > 0 && gameRound >= MID_ROUND && gameRound < HIGH_ROUND) {
+          hordeQuality -= lostedLives * 2;
+        }
+        hordeQuality = Math.max(0, Math.round(hordeQuality));
+      
+        hordeQualityLog.quality = hordeQuality;
+        await hordeQualityLog.save();
+      }
 
     const towersData   = await Tower.findAll({ where: { gameId } });
     const enemyTypes   = await Enemy.findAll();
@@ -65,11 +100,8 @@ const generateHorde = async (req, res) => {
       })
       .filter(Boolean);
     
-    const game = await Game.findOne({ where: { id: gameId } });
     const gameGold = game.gold + earnedGold; 
-    let gameRound = game.round;  
     const isHardMode = game.isHardMode;
-    
     
     function randomHorde() {
         const size = Math.ceil(Math.random() * MAX_HORDE_SIZE);
@@ -80,7 +112,6 @@ const generateHorde = async (req, res) => {
       }
 
     let UPRG_RATIO = 1;
-    console.log("Ronda del juego:", gameRound);
     if (gameRound > 1 && gameGold > 120) {
       UPRG_RATIO += Math.min(gameGold / 1000, 1);
     } else if (gameRound <= 1) {
@@ -216,7 +247,6 @@ const generateHorde = async (req, res) => {
       //Printeamos el valor del ratio 
       console.log('UPRG_RATIO:', UPRG_RATIO);
 
-      // Impactos en cada enemigo
       best.forEach(e => {
         console.log('Enemy:', e.name);
         for (const pos in e.hits) {
@@ -231,7 +261,21 @@ const generateHorde = async (req, res) => {
       game.gold = gameGold;
       await game.save();
       
-    
+      const hordeLogStrings = best.map(e => {
+        const hitsStr = Object.entries(e.hits)
+          .map(([pos, val]) => `${pos}: ${val}`)
+          .join(', ');
+        return `Enemy: ${e.name}, Hits: {${hitsStr}}`;
+      });
+      const towerPositionsLog = towerZones.map(t => `${t.name}: ${t.position}`);
+
+      await HordeQualityLog.create({
+        hordeLog: hordeLogStrings,
+        towerPositions: towerPositionsLog,
+        round: game.round,
+        gameId: game.id,
+      });
+      
       return res.json({
         pathPixels:  fullPath.length,
         towers:      towerZones,

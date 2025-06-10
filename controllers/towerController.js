@@ -103,8 +103,8 @@ const deployTower = async (req, res) => {
             where: { userId: loggedInUserId },
             transaction
         });
-
-        stats.towers_placed += 1;
+        console.log("hola", stats)
+        stats.towers_deployed += 1;
         await stats.save({ transaction });    
         await transaction.commit();
         res.status(200).json({ message: 'Tower deployed successfully', tower: newTower, upgrade: newUpgrade });

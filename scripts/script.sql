@@ -1,6 +1,6 @@
 -- Eliminar las tablas en orden correcto
 DROP TABLE IF EXISTS Enemy;
-DROP TABLE IF EXISTS Wave;
+DROP TABLE IF EXISTS Horde;
 DROP TABLE IF EXISTS Upgrade;
 DROP TABLE IF EXISTS Projectile;
 DROP TABLE IF EXISTS Tower;
@@ -42,7 +42,7 @@ CREATE TABLE Tower (
     cost INT CHECK (cost BETWEEN 1 AND 500),
     avatar JSON,
     fire_rate DOUBLE CHECK (fire_rate BETWEEN 0.00 AND 10.00),
-    attack_range DOUBLE CHECK (attack_range BETWEEN 0.00 AND 100.00)wave
+    attack_range DOUBLE CHECK (attack_range BETWEEN 0.00 AND 100.00)horde
 );
 
 CREATE TABLE Projectile (
@@ -64,7 +64,7 @@ CREATE TABLE Upgrade (
     rangeBoost DOUBLE CHECK (rangeBoost BETWEEN 0.00 AND 1.00)
 );
 
-CREATE TABLE Wave (
+CREATE TABLE Horde (
     id INT AUTO_INCREMENT PRIMARY KEY,
     total INT CHECK (total BETWEEN 3 AND 999),
     game_id INT,
@@ -82,5 +82,5 @@ CREATE TABLE Enemy (
     damage_reduction DOUBLE CHECK (damage_reduction BETWEEN 0.00 AND 1.00),
     avatar VARCHAR(255),
     wave_id INT,
-    FOREIGN KEY (wave_id) REFERENCES Wave(id) ON DELETE CASCADE
+    FOREIGN KEY (wave_id) REFERENCES Horde(id) ON DELETE CASCADE
 );

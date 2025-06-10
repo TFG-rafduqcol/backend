@@ -3,7 +3,7 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 const enemy = require('./enemy');
 
-const Wave = sequelize.define('Wave', {
+const Horde = sequelize.define('Horde', {
     id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
@@ -18,9 +18,9 @@ const Wave = sequelize.define('Wave', {
     },
 });
 
-Wave.hasMany(enemy, { onDelete: 'cascade' });
-enemy.belongsTo(Wave);
+Horde.hasMany(enemy, { onDelete: 'cascade' });
+enemy.belongsTo(Horde);
 
-module.exports = Wave;
+module.exports = Horde;
 
 

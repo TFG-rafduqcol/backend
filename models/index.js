@@ -3,7 +3,7 @@ const sequelize = require('../config/db');
 
 const User = require('./user');
 const Game = require('./game');
-const Wave = require('./wave');
+const Horde = require('./horde');
 const Enemy = require('./enemy');
 const Tower = require('./tower');
 const Projectile = require('./projectile');
@@ -17,11 +17,11 @@ const Stats = require('./stats');
 User.hasMany(Game);
 Game.belongsTo(User);
 
-Game.belongsToMany(Wave, { through: 'GameWaves' });
-Wave.belongsToMany(Game, { through: 'GameWaves' });
+Game.belongsToMany(Horde, { through: 'GameWaves' });
+Horde.belongsToMany(Game, { through: 'GameWaves' });
 
-Wave.belongsToMany(Enemy, { through: 'WaveEnemies' });
-Enemy.belongsToMany(Wave, { through: 'WaveEnemies' });
+Horde.belongsToMany(Enemy, { through: 'WaveEnemies' });
+Enemy.belongsToMany(Horde, { through: 'WaveEnemies' });
 
 
 Game.hasMany(Tower, {
@@ -98,4 +98,4 @@ Stats.belongsTo(User, {
   as: 'user'
 });
 
-module.exports = { sequelize, User, Game, Wave, Tower, Projectile, Upgrade, Enemy, Range, Avatar, FriendShip, Stats };
+module.exports = { sequelize, User, Game, Horde, Tower, Projectile, Upgrade, Enemy, Range, Avatar, FriendShip, Stats };

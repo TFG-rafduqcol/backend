@@ -161,7 +161,7 @@ const usersData = [
         firstName: 'Admin',
         lastName: 'Admin',
         username: 'Admin',
-        email: 'Admin@email.com',
+        email: 'admin@email.com',
         password: '$2b$10$.WahX65e87xtCCrcbV5l8ufr/e7pAnXXapSb.xXyB7BHkI1leKq7W',
         experience: 2000,
         gold: 0,

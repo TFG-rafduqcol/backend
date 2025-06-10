@@ -5,7 +5,7 @@ const Game = require("../models/game");
 const { Op } = require("sequelize");
 
 
-const isAdmin = async (req, res, next) => {
+const isAdmin = async (req, res) => {
     const transaction = await sequelize.transaction();
     try {
         const userId = req.userId;

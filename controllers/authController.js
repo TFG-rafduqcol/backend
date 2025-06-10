@@ -8,6 +8,8 @@ const Stats = require('../models/stats');
 
 require('dotenv').config();
 
+const PASSWORD_REGEX = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/;
+const PASSWORD_ERROR_MSG = "The password must contain at least 8 characters, one lowercase letter, one uppercase letter, and one number.";
 
 const checkEmail = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -44,8 +46,7 @@ const checkEmail = async (req, res) => {
 const registerPlayer = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { firstName, lastName, username, email, password } = req.body;
-    
+    const { firstName, lastName, username, email, password, isAdmin, activeAvatarId, rangeId } = req.body;
     if (!firstName || !lastName || !username || !email || !password) {
       await transaction.rollback();
       return res.status(400).json({
@@ -53,25 +54,27 @@ const registerPlayer = async (req, res) => {
         message: "Email, password, username, email and password are required.",
       });
     }
-
+    if (!PASSWORD_REGEX.test(password)) {
+      await transaction.rollback();
+      return res.status(400).json({
+        error: "PasswordValidationError",
+        message: PASSWORD_ERROR_MSG
+      });
+    }
     const newUser = await User.create({
       firstName,
       lastName,
       username,
       email,
       password,
-      isAdmin: false,
-      activeAvatarId: 1,
-      rangeId: 3,
-    }, { transaction }); 
-
+      isAdmin: typeof isAdmin !== 'undefined' ? isAdmin : false,
+      activeAvatarId: activeAvatarId || 1,
+      rangeId: rangeId || 1,
+    }, { transaction });
     await Stats.create({
       userId: newUser.id
     }, { transaction });
-
-
     await transaction.commit();
-
     res.status(201).json(newUser);
   } catch (error) {
     await transaction.rollback();
@@ -195,11 +198,12 @@ const updateUser = async (req, res) => {
 
       let { firstName, lastName, username, email, password} = req.body;
 
+      // Solo los campos principales son obligatorios, password es opcional
       if (!firstName || !lastName || !username || !email) {
           await transaction.rollback();
           return res.status(400).json({
               error: "ValidationError",
-              message: "First name, last name, username, email and password are required."
+              message: "First name, last name, username y email son requeridos."
           });
       }
 
@@ -229,7 +233,6 @@ const updateUser = async (req, res) => {
 
       if (email && email !== user.email) {
         const existingUser = await User.findOne({ where: { email: email }, transaction });
-        
         if (existingUser) {
             await transaction.rollback();
             return res.status(400).json({
@@ -240,6 +243,14 @@ const updateUser = async (req, res) => {
       }
 
       if(password && password !== "") {
+          // Validación de formato de contraseña
+          if (!PASSWORD_REGEX.test(password)) {
+            await transaction.rollback();
+            return res.status(400).json({
+              error: "PasswordValidationError",
+              message: PASSWORD_ERROR_MSG
+            });
+          }
           const salt = await bcrypt.genSalt(10);
           const hashedPassword = await bcrypt.hash(password, salt);
           password = hashedPassword;

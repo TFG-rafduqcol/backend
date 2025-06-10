@@ -10,7 +10,6 @@ const authenticateToken = (req, res, next) => {
         if (err) {
             return res.status(403).json({ message: 'Invalid or expired token' });
         }
-    // Check if the token is valid and extract user information
         
         const userId = decoded.id; 
         const isAdmin = decoded.isAdmin;

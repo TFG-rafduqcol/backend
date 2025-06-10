@@ -43,10 +43,6 @@ const User = sequelize.define( "User",
       allowNull: false,
       validate: {
         len: [8, 255],
-        is: {
-          args: /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/,
-          msg: "The password must contain at least 8 characters, one lowercase letter, one uppercase letter, and one number.",
-        },
       },
     },
     experience: {
