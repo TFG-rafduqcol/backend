@@ -5,7 +5,7 @@ const Projectile = require('../models/projectile');
 const Enemy = require('../models/enemy');
 const Upgrade = require('../models/upgrade');
 const HordeQualityLog = require('../models/hordeQualityLog');
-
+const stats = require('../models/stats');
 const { json } = require('sequelize');
 const hordeQualityLog = require('../models/hordeQualityLog');
 
@@ -13,7 +13,7 @@ const hordeQualityLog = require('../models/hordeQualityLog');
 
 const generateHorde = async (req, res) => {
   const { gameId } = req.params;
-  const { earnedGold, lostedLives } = req.body;  
+  const { earnedGold, lostedLives, enemiesKilled } = req.body;  
   const spacingTime   = 1.5;  // segundos entre enemigos
   const MAX_HORDE_SIZE = 10;
   const POPULATION_SIZE = 30;
@@ -79,6 +79,13 @@ const generateHorde = async (req, res) => {
         await hordeQualityLog.save();
       }
 
+      const playerStats = await stats.findOne({ where: { userId: req.userId } }); 
+      
+      playerStats.enemiesKilled += enemiesKilled;
+      playerStats.gold += earnedGold;
+
+      await playerStats.save();
+
     const towersData   = await Tower.findAll({ where: { gameId } });
     const enemyTypes   = await Enemy.findAll();
     const fullPath     = interpolatePath(rawPath);
@@ -101,7 +108,7 @@ const generateHorde = async (req, res) => {
       .filter(Boolean);
     
     const gameGold = game.gold + earnedGold; 
-    const isHardMode = game.isHardMode;
+    const isHardMode = game.hardMode;
     
     function randomHorde() {
         const size = Math.ceil(Math.random() * MAX_HORDE_SIZE);

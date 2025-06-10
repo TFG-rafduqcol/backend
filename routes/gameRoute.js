@@ -182,18 +182,18 @@ router.put('/updateGame/:gameId', authenticateToken, updateGame);
  *   post:
  *     tags:
  *       - Game
- *     summary: End a game session and process rewards
- *     description: Marks a game as completed, calculates rewards, and updates user rank if necessary.
+ *     summary: Finaliza una partida y procesa las recompensas
+ *     description: Marca una partida como finalizada, actualiza estadísticas del usuario y rango si corresponde. Solo se puede finalizar si las vidas del juego son 0 o menos.
  *     parameters:
  *       - in: path
  *         name: gameId
  *         required: true
  *         schema:
  *           type: string
- *         description: The ID of the game session to end.
+ *         description: El ID de la partida a finalizar.
  *     responses:
  *       200:
- *         description: Game ended successfully
+ *         description: Partida finalizada correctamente
  *         content:
  *           application/json:
  *             schema:
@@ -207,13 +207,15 @@ router.put('/updateGame/:gameId', authenticateToken, updateGame);
  *                   example: 52
  *                 xpEarned:
  *                   type: integer
- *                   example: 10400
+ *                   example: 1040
  *                 gemsEarned:
  *                   type: integer
  *                   example: 52
  *                 newRank:
  *                   type: string
  *                   example: "Master"
+ *       400:
+ *         description: Game is still ongoing (vidas > 0)
  *       403:
  *         description: Forbidden – the game does not belong to the authenticated user
  *       404:

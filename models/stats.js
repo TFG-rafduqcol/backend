@@ -17,7 +17,7 @@ const Stats = sequelize.define(
             type: DataTypes.INTEGER,
             defaultValue: 0,
         },
-        tower_upgraded: {
+        towers_upgraded: {
             type: DataTypes.INTEGER,
             defaultValue: 0,
         },

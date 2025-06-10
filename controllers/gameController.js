@@ -1,6 +1,7 @@
 const sequelize = require('../models/index').sequelize;
 const Game = require('../models/game');
 const User = require('../models/user');
+const HordeQualityLog = require('../models/hordeQualityLog');
 
 const createGame = async (req, res) => {
     const transaction = await sequelize.transaction();
@@ -94,48 +95,57 @@ const endGame = async (req, res) => {
     const transaction = await sequelize.transaction();
     
     try {
-        const game = await Game.findOne({ 
-            where: { id: gameId },
-            transaction
-        });
-        
-        if (!game) {
-            await transaction.rollback();
-            return res.status(404).json({ error: 'Game not found' });
-        }
 
-        if (game.UserId !== req.userId) {
-            await transaction.rollback();
-            return res.status(403).json({ error: 'Forbidden' });
-        }
-
-        const loggedInUserId = req.userId;
-        const loggedUser = await User.findByPk(loggedInUserId, { transaction });
-        
-        if (!loggedUser) {
-            await transaction.rollback();
-            return res.status(404).json({ error: 'User not found' });
-        }
-
+        const game = await Game.findOne({ where: { id: gameId }, transaction });
         const gameRound = game.round;
 
-        if (gameRound >= 50) {
-            loggedUser.rangeId = 1; // Rango Master id 1
-        }
-
-        await loggedUser.save({ transaction });
-        
-        game.completed = true;
-        await game.save({ transaction });
-        
-        await transaction.commit();
-        res.status(200).json({ 
-            message: 'Game ended successfully',
-            round: gameRound,
-            xpEarned: gameRound * 200,
-            gemsEarned: gameRound * 1,
-            newRank: gameRound >= 50 ? 'Master' : null
+        const hordeQualityLog = await HordeQualityLog.findOne({
+          where: {
+            gameId,
+            round: gameRound
+          }
         });
+
+        let hordeQuality = 100;
+        const HIGH_ROUND = 40;
+        const MID_ROUND = 25;
+        const MANY_LIVES = 5; 
+
+        if (lostedLives && lostedLives >= MANY_LIVES && gameRound < MID_ROUND) {
+          hordeQuality -= lostedLives * 5; 
+        }
+        if (lostedLives && lostedLives >= MANY_LIVES && gameGold < 100) {
+          hordeQuality -= lostedLives * 4; 
+        }
+        if (lostedLives && lostedLives > 0 && gameRound >= MID_ROUND && gameRound < HIGH_ROUND) {
+          hordeQuality -= lostedLives * 2;
+        }
+        hordeQuality = Math.max(0, Math.round(hordeQuality));
+      
+        hordeQualityLog.quality = hordeQuality;
+        await hordeQualityLog.save();
+      
+
+     
+
+        const playerStats = await stats.findOne({ where: { userId: req.userId } }); 
+
+        if (gameRound > playerStats.rounds_passed) playerStats.rounds_passed = gameRound;
+        playerStats.games_played++;
+        playerStats.gems_earned = gameRound;
+
+        const isHardMode = game.isHardMode;
+        const player = await User.findByPk(req.userId);
+        if (player.rangeId === 3 && gameRound >= 50 && !isHardMode) {
+            player.rangeId = 2;
+        }
+        else if (player.rangeId === 2 && gameRound >= 50 && isHardMode) {
+            player.rangeId = 1; 
+        }
+        await player.save();
+        await playerStats.save({ transaction });
+
+
     } catch (error) {
         await transaction.rollback();
         console.error("Error ending game:", error);
