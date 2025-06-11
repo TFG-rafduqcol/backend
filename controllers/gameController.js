@@ -2,6 +2,7 @@ const sequelize = require('../models/index').sequelize;
 const Game = require('../models/game');
 const User = require('../models/user');
 const HordeQualityLog = require('../models/hordeQualityLog');
+const stats = require('../models/stats');
 
 const createGame = async (req, res) => {
     const transaction = await sequelize.transaction();
@@ -92,12 +93,14 @@ const updateGame = async (req, res) => {
 
 const endGame = async (req, res) => {
     const { gameId } = req.params;
+    const { lostedLives } = req.body;
     const transaction = await sequelize.transaction();
     
     try {
 
         const game = await Game.findOne({ where: { id: gameId }, transaction });
         const gameRound = game.round;
+        const gameGold = game.gold;
 
         const hordeQualityLog = await HordeQualityLog.findOne({
           where: {
@@ -125,10 +128,7 @@ const endGame = async (req, res) => {
         hordeQualityLog.quality = hordeQuality;
         await hordeQualityLog.save();
       
-
-     
-
-        const playerStats = await stats.findOne({ where: { userId: req.userId } }); 
+        const playerStats = await stats.findOne({ where: { userId: req.userId }, transaction }); 
 
         if (gameRound > playerStats.rounds_passed) playerStats.rounds_passed = gameRound;
         playerStats.games_played++;
@@ -136,6 +136,8 @@ const endGame = async (req, res) => {
 
         const isHardMode = game.isHardMode;
         const player = await User.findByPk(req.userId);
+
+        console.log("hola1", player.rangeId === 3, gameRound >= 50, !isHardMode);
         if (player.rangeId === 3 && gameRound >= 50 && !isHardMode) {
             player.rangeId = 2;
         }
@@ -144,7 +146,6 @@ const endGame = async (req, res) => {
         }
         await player.save();
         await playerStats.save({ transaction });
-
 
     } catch (error) {
         await transaction.rollback();

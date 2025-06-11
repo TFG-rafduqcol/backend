@@ -103,7 +103,6 @@ const deployTower = async (req, res) => {
             where: { userId: loggedInUserId },
             transaction
         });
-        console.log("hola", stats)
         stats.towers_deployed += 1;
         await stats.save({ transaction });    
         await transaction.commit();
@@ -154,7 +153,7 @@ const upgradeTower = async (req, res) => {
         await upgrade.save({ transaction });     
         tower.cost += upgrade.cost;
         tower.damage += upgrade.damage_boost;
-        tower.fire_rate += upgrade.fire_rate_boost;
+        tower.fire_rate -= upgrade.fire_rate_boost;
         tower.range += upgrade.range_boost;
         await tower.save({ transaction });
 

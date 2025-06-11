@@ -57,7 +57,7 @@ const usersData = [
         gems: 20,
         gameId: 1,
         activeAvatarId: 1, 
-        rangeId: 2,
+        rangeId: 3,
 
     },
     {
