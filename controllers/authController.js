@@ -198,7 +198,6 @@ const updateUser = async (req, res) => {
 
       let { firstName, lastName, username, email, password} = req.body;
 
-      // Solo los campos principales son obligatorios, password es opcional
       if (!firstName || !lastName || !username || !email) {
           await transaction.rollback();
           return res.status(400).json({
@@ -243,7 +242,6 @@ const updateUser = async (req, res) => {
       }
 
       if(password && password !== "") {
-          // Validación de formato de contraseña
           if (!PASSWORD_REGEX.test(password)) {
             await transaction.rollback();
             return res.status(400).json({

@@ -293,17 +293,16 @@ jest.spyOn(console, 'error').mockImplementation(() => {});
 
 
 describe('PUT /api/auth/update', () => {
-  const ENDPOINT = '/api/auth/update';
-  const userPayload = {
+  const ENDPOINT = '/api/auth/update';  const userPayload = {
     firstName: 'John',
     lastName: 'Doe',
     username: 'johnny',
     email: 'john@example.com',
-    password: 'newpassword123',
+    password: 'newPassword123',
   };
 
   const badPayload = { ...userPayload, email: "" }; 
-  const user = { id: 1, isAdmin: false };
+  const user = { id: 1, isAdmin: true };
 
   const mockUser = {
     id: 1,
@@ -316,7 +315,7 @@ describe('PUT /api/auth/update', () => {
     level: 2,
     gold: 50,
     gems: 10,
-    isAdmin: false,
+    isAdmin: true,
     active_avatar: { image_url: 'avatar.png' },
     range: { name: 'Gold', image_url: 'range.png' },
     update: jest.fn().mockResolvedValue(true)
@@ -347,56 +346,57 @@ describe('PUT /api/auth/update', () => {
   };
 
 
-
   test('200 - Successfully updates user', async () => {
+    // Mock admin usuario logueado
+    const adminUser = { ...mockUser };
+    // Mock usuario a actualizar 
+    const userToUpdate = { 
+      ...mockUser, 
+      id: 1,
+      firstName: 'Old', 
+      lastName: 'Name',
+      username: 'olduser',
+      email: 'john@example.com',  // Mismo email que en el payload
+      isAdmin: false 
+    };
 
-    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser);
-    jest.spyOn(User, 'findOne').mockResolvedValue(null); 
-
-    mockUser.update.mockImplementation(async (values) => {
-      Object.assign(mockUser, values);
-      return mockUser;
-    });
-
-    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(mockUser);
+    // Primera llamada: busca al usuario logueado (admin)
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(adminUser);
+    // Segunda llamada: busca al usuario a actualizar
+    jest.spyOn(User, 'findByPk').mockResolvedValueOnce(userToUpdate);
+    // No hay conflicto de email
+    jest.spyOn(User, 'findOne').mockResolvedValue(null);
+    
+    // Mock para hashear contraseña
     jest.spyOn(bcrypt, 'genSalt').mockResolvedValue('salt');
     jest.spyOn(bcrypt, 'hash').mockResolvedValue('passwordHashed');
-
-      jest.spyOn(User.prototype, 'update').mockResolvedValueOnce({
-        id: mockUser.id,
-        firstName: userPayload.firstName,
-        lastName: userPayload.lastName,
-        username: userPayload.username,
-        email: userPayload.email,
-        password: 'passwordHashed',
+    
+    // Mock para update
+    userToUpdate.update = jest.fn().mockImplementation(async (values) => {
+      Object.assign(userToUpdate, values);
+      return userToUpdate;
     });
 
     const res = await authenticatedRequest(userPayload);
     
     expect(res.status).toBe(200);
-    expect(mockUser.update).toHaveBeenCalledWith(
-    expect.objectContaining({
-      firstName: userPayload.firstName,
-      lastName: userPayload.lastName,
-      username: userPayload.username,
-      email: userPayload.email,
-      password: 'passwordHashed',
-    }),
-    expect.objectContaining({
-      transaction: expect.objectContaining({
-        commit: expect.any(Function),
-        rollback: expect.any(Function),
+    expect(userToUpdate.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        firstName: userPayload.firstName,
+        lastName: userPayload.lastName,
+        username: userPayload.username,
+        email: userPayload.email,
+        password: 'passwordHashed',
       }),
-    })
-);
+      { transaction }
+    );
 
-    expect(res.body.user.id).toBe(mockUser.id);
+    expect(res.body.user.id).toBe(userToUpdate.id);
     expect(res.body.user.firstName).toBe(userPayload.firstName);
     expect(res.body.user.lastName).toBe(userPayload.lastName);
     expect(res.body.user.username).toBe(userPayload.username);
     expect(res.body.user.email).toBe(userPayload.email);
     expect(res.body.token).toBeDefined(); 
-
   });
 
   test('400 - Missing required fields', async () => {
