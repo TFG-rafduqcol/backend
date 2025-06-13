@@ -91,9 +91,8 @@ describe('POST /api/auth/register', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
-
   test('201 on success', async () => {
-    const newUser = { id: 1, ...payload, isAdmin: false, activeAvatarId: 1, rangeId: 1 };
+    const newUser = { id: 1, ...payload, isAdmin: false, activeAvatarId: 1, rangeId: 3 };
     
 
 
@@ -113,7 +112,7 @@ describe('POST /api/auth/register', () => {
         password: payload.password,
         isAdmin: false,
         activeAvatarId: 1,
-        rangeId: 1,
+        rangeId: 3,
       }),
       { transaction }
     );
