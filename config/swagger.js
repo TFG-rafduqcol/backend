@@ -10,7 +10,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: "http://localhost:3000/",
+        url: "httsps://backend-production-c59c.up.railway.app/",
       },
     ],
     components: {
