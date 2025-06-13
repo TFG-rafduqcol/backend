@@ -1,5 +1,8 @@
-# Railway Node.js
-[build]
-  command = "npm ci"
-[start]
-  command = "npm start"
+{
+  "build": {
+    "command": "npm ci"
+  },
+  "start": {
+    "command": "npm start"
+  }
+}
