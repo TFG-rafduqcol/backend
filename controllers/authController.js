@@ -69,7 +69,7 @@ const registerPlayer = async (req, res) => {
       password,
       isAdmin: typeof isAdmin !== 'undefined' ? isAdmin : false,
       activeAvatarId: activeAvatarId || 1,
-      rangeId: rangeId || 1,
+      rangeId: rangeId || 3,
     }, { transaction });
     await Stats.create({
       userId: newUser.id
