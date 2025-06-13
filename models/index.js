@@ -11,6 +11,7 @@ const Avatar = require('./avatar');
 const Range = require('./range');
 const FriendShip = require('./friendShip');
 const Stats = require('./stats');
+const hordeQualityLog = require('./hordeQualityLog');
 
 
 User.hasMany(Game);
@@ -92,4 +93,4 @@ Stats.belongsTo(User, {
   as: 'user'
 });
 
-module.exports = { sequelize, User, Game, Tower, Projectile, Upgrade, Enemy, Range, Avatar, FriendShip, Stats };
+module.exports = { sequelize, User, Game, Tower, Projectile, Upgrade, Enemy, Range, Avatar, FriendShip, Stats, hordeQualityLog };

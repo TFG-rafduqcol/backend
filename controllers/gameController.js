@@ -145,7 +145,14 @@ const endGame = async (req, res) => {
         }
         await player.save();
         await playerStats.save({ transaction });
-
+        await transaction.commit();
+        res.status(200).json({
+            message: 'Game ended successfully',
+            round: gameRound,
+            xpEarned: gameRound * 20, 
+            gemsEarned: gameRound,
+            newRank: player.rangeId
+        });
     } catch (error) {
         await transaction.rollback();
         console.error("Error ending game:", error);
