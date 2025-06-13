@@ -24,13 +24,7 @@ const Projectile = sequelize.define("Projectile", {
             max: 20,
         },
     },
-    stroke: {
-        type: DataTypes.ENUM(...STROKE_TYPES),
-        allowNull: false,
-    },
-    avatar: {
-        type: DataTypes.JSON,
-    },  
+ 
 }, {
     timestamps: false,
     tableName: "projectiles",

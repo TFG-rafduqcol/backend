@@ -22,9 +22,6 @@ const Tower = sequelize.define("Tower", {
             max: 999,
         },
     },
-    avatar: {
-        type: DataTypes.JSON,
-    },
     damage: {
         type: DataTypes.DOUBLE,
         allowNull: false,

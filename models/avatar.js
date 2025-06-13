@@ -8,13 +8,18 @@ const Avatar = sequelize.define(
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
-        },        image_url: {
+        },        
+        image_url: {
             type: DataTypes.STRING,
             defaultValue: "http://192.168.100.7:8000/images/avatars/avatar_1.jpeg"
         },
         gems: {
             type: DataTypes.INTEGER,
-            defaultValue: 50
+            defaultValue: 50,
+            validate: {
+                min: 0,
+                max: 1000, 
+            },
         },
     },
     {

@@ -214,10 +214,10 @@ const UserAvatars = [
 ];
 
 const projectilesData = [
-    { id: 1, name: 'stone', speed: 6, stroke: 'ICE', avatarId: 1 },
-    { id: 2, name: 'iron', speed: 8, stroke: 'FIRE', avatarId: 2 },
-    { id: 3, name: 'fire', speed: 4, stroke: 'MAGIC', avatarId: 3 },
-    { id: 4, name: 'rock',  speed: 4, stroke: 'MAGIC', avatarId: 3 },
+    { id: 1, name: 'stone', speed: 6 },
+    { id: 2, name: 'iron', speed: 8 },
+    { id: 3, name: 'fire', speed: 4 },
+    { id: 4, name: 'rock',  speed: 4 },
 ];
 const towersData = [
     { id: 1, name: 'stoneCannon', damage: 10, cost: 100, fire_rate: 3, range: 140, position: 1, gameId: 1, projectileId: 1 },
@@ -227,15 +227,15 @@ const towersData = [
 
 
 const enemiesData = [
-    { id: 1, name: 'daggerkin', level: 1, health: 40, speed: 30, lifes: 1, gold: 10, avatar: '' },
-    { id: 2, name: 'orcutter', level: 2, health: 60, speed: 15, lifes: 1, gold: 12, avatar: '' },
-    { id: 3, name: 'oculom', level: 3, health: 40, speed: 25, lifes: 1, gold: 10, avatar: '' },
-    { id: 4, name: 'devilOrc', level: 4, health: 90, speed: 12, lifes: 1, gold: 15, avatar: '' },
-    { id: 5, name: 'graySkull', level: 5, health: 140, speed: 8, lifes: 3, gold: 25, avatar: '' },
-    { id: 6, name: 'carrionTropper', level: 6, health: 90, speed: 14, lifes: 2, gold: 20, avatar: '' },
-    { id: 7, name: 'hellBat', level: 7, health: 90, speed: 17, lifes: 2, gold: 15, avatar: '' },
-    { id: 8, name: 'hexLord', level: 8, health: 90, speed: 17, lifes: 4, gold: 20, avatar: '' },
-    { id: 9, name: 'darkSeer', level: 9, health: 140, speed: 10, lifes: 5, gold: 30, avatar: '' },
+    { id: 1, name: 'daggerkin',  health: 40, speed: 30, lifes: 1, gold: 10 },
+    { id: 2, name: 'orcutter', health: 60, speed: 15, lifes: 1, gold: 12 },
+    { id: 3, name: 'oculom',  health: 40, speed: 25, lifes: 1, gold: 10 },
+    { id: 4, name: 'devilOrc', health: 90, speed: 12, lifes: 1, gold: 15 },
+    { id: 5, name: 'graySkull',  health: 140, speed: 8, lifes: 3, gold: 25 },
+    { id: 6, name: 'carrionTropper',  health: 90, speed: 14, lifes: 2, gold: 2 },
+    { id: 7, name: 'hellBat',  health: 90, speed: 17, lifes: 2, gold: 15 },
+    { id: 8, name: 'hexLord', health: 90, speed: 17, lifes: 4, gold: 20 },
+    { id: 9, name: 'darkSeer',  health: 140, speed: 10, lifes: 5, gold: 30 },
 ];
 
     

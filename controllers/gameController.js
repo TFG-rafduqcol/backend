@@ -137,7 +137,6 @@ const endGame = async (req, res) => {
         const isHardMode = game.isHardMode;
         const player = await User.findByPk(req.userId);
 
-        console.log("hola1", player.rangeId === 3, gameRound >= 50, !isHardMode);
         if (player.rangeId === 3 && gameRound >= 50 && !isHardMode) {
             player.rangeId = 2;
         }

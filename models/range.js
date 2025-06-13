@@ -11,14 +11,14 @@ const Range = sequelize.define(
         },
         name: {
             type: DataTypes.STRING,
-            defaultValue: "Bronze",
+            defaultValue: "Silver",
             validate: {
-                isIn: [["Bronze", "Silver", "Gold", "Diamond", "Master"]],
+                isIn: [["Silver", "Gold", "Master"]],
             },
         },
         image_url: {
             type: DataTypes.STRING,
-            defaultValue: "https://127.0.0.1:8000/www/images/master.png"
+            defaultValue: "https://127.0.0.1:8000/www/images/silver.png"
         },
     },
     {

@@ -119,12 +119,32 @@ const generateHorde = async (req, res) => {
       }
 
     let UPRG_RATIO = 1;
+    const roundMap = {
+      30: 0.1,
+      40: 0.2,
+      50: 0.3,
+      60: 0.4,
+      70: 0.5,
+    };
+
     if (gameRound > 1 && gameGold > 120) {
       UPRG_RATIO += Math.min(gameGold / 1000, 1);
-    } else if (gameRound <= 1) {
+      if (gameRound in roundMap) {
+        UPRG_RATIO += roundMap[gameRound];
+      } else if (gameRound > 70) {
+        UPRG_RATIO += roundMap[70];
+      }
+    } else if (gameRound < 1) {
       UPRG_RATIO = 0.85;
+    } else {
+      if (gameRound in roundMap) {
+        UPRG_RATIO += roundMap[gameRound];
+      } else if (gameRound > 70) {
+        UPRG_RATIO += roundMap[70];
+      }
     }
     gameRound++;
+
 
     // Función fitness
    function fitness(horde) {

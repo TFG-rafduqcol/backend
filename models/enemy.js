@@ -10,14 +10,6 @@ const Enemy = sequelize.define(
             autoIncrement: true,
             primaryKey: true,
         },
-        level: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            validate: {
-                min: 1,
-                max: 999,
-            },
-        },
         name: {
             type: DataTypes.STRING(50),
             allowNull: false,
