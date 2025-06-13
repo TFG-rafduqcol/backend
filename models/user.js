@@ -47,9 +47,9 @@ const User = sequelize.define( "User",
     },
     experience: {
       type: DataTypes.INTEGER,
-      defaultValue: 2000,
+      defaultValue: 0,
       validate: {
-        min: 2000,
+        min: 0,
         max: 31700,
       },
     },

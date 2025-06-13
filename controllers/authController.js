@@ -46,7 +46,7 @@ const checkEmail = async (req, res) => {
 const registerPlayer = async (req, res) => {
   const transaction = await sequelize.transaction();
   try {
-    const { firstName, lastName, username, email, password, isAdmin, activeAvatarId, rangeId } = req.body;
+    const { firstName, lastName, username, email, password, isAdmin, } = req.body;
     if (!firstName || !lastName || !username || !email || !password) {
       await transaction.rollback();
       return res.status(400).json({
@@ -68,8 +68,8 @@ const registerPlayer = async (req, res) => {
       email,
       password,
       isAdmin: typeof isAdmin !== 'undefined' ? isAdmin : false,
-      activeAvatarId: activeAvatarId || 1,
-      rangeId: rangeId || 3,
+      activeAvatarId: 1,
+      rangeId: 3,
     }, { transaction });
     await Stats.create({
       userId: newUser.id
