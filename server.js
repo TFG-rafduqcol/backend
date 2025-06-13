@@ -93,9 +93,8 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// Solo HTTP, ignora certificados
 if (process.env.NODE_ENV !== 'test' && process.env.JEST_WORKER_ID === undefined) {
-    http.createServer(app).listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
         console.log(`Servidor HTTP escuchando en http://0.0.0.0:${PORT}`);
         console.log(`📱 Accede desde dispositivos en la misma red usando: http://${getIPAddress()}:${PORT}`);
         console.log('Swagger UI available at: http://localhost:3000/api-docs');
