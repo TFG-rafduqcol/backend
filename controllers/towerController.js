@@ -65,11 +65,6 @@ const deployTower = async (req, res) => {
             transaction
         });
 
-        if (!projectile) {
-            await transaction.rollback();
-            return res.status(400).json({ error: 'Projectile not found for this tower' });
-        }
-
         const upgrades = {
             stoneCannon: { cost: 100, damage_boost: 1, range_boost: 10, fire_rate_boost: 0.1 },
             ironCannon: { cost: 125, damage_boost: 2, range_boost: 10, fire_rate_boost: 0.1 },
