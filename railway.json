@@ -1,0 +1,5 @@
+# Railway Node.js
+[build]
+  command = "npm ci"
+[start]
+  command = "npm start"
