@@ -85,7 +85,7 @@ const usersData = [
         gems: 30,
         gameId: 3,
         activeAvatarId: 3, 
-        rangeId: 1,
+        rangeId: 2,
 
     },
     {
@@ -99,7 +99,7 @@ const usersData = [
         gems: 25,
         gameId: 4,
         activeAvatarId: 4, 
-        rangeId: 1,
+        rangeId: 3,
 
     },
     {
@@ -127,7 +127,7 @@ const usersData = [
         gems: 15,
         gameId: 6,
         activeAvatarId: 1,
-        rangeId: 1,
+        rangeId: 2,
 
     },
     {
@@ -141,7 +141,7 @@ const usersData = [
         gems: 60,
         gameId: 7,
         activeAvatarId: 2, 
-        rangeId: 1,
+        rangeId: 3,
     },
     {
         firstName: 'Player8',
@@ -168,7 +168,7 @@ const usersData = [
         gems: 0,
         isAdmin: 1,
         activeAvatarId: 1,
-        rangeId: 1,
+        rangeId: 2,
 
     },
 ];
