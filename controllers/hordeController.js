@@ -15,7 +15,7 @@ const generateHorde = async (req, res) => {
   const { gameId } = req.params;
   const { earnedGold, lostedLives, enemiesKilled } = req.body;  
   const spacingTime   = 1.5;  // segundos entre enemigos
-  const MAX_HORDE_SIZE = 10;
+  const MAX_HORDE_SIZE = 20;
   const POPULATION_SIZE = 30;
   const GENERATIONS    = 60;
   const MUTATION_RATE  = 0.1;
@@ -49,6 +49,7 @@ const generateHorde = async (req, res) => {
    
     const game = await Game.findOne({ where: { id: gameId } });
     let gameRound = game.round;  
+    const gameGold = game.gold + earnedGold; 
 
     if (gameRound > 0) {
 
@@ -107,7 +108,6 @@ const generateHorde = async (req, res) => {
       })
       .filter(Boolean);
     
-    const gameGold = game.gold + earnedGold; 
     const isHardMode = game.hardMode;
     
     function randomHorde() {
@@ -118,8 +118,8 @@ const generateHorde = async (req, res) => {
         });
       }
 
-    let UPRG_RATIO = 1;
-    const roundMap = {
+    let UPRG_RATIO = 1; // La vida de los enemigos se ajusta al daño que las torres pueden infligir,
+    const roundMap = {  // Segun la ronda, se ajusta el ratio UPRG
       30: 0.1,
       40: 0.2,
       50: 0.3,
@@ -127,16 +127,16 @@ const generateHorde = async (req, res) => {
       70: 0.5,
     };
 
-    if (gameRound > 1 && gameGold > 120) {
-      UPRG_RATIO += Math.min(gameGold / 1000, 1);
+    if (gameRound > 1 && gameGold > 120) {   // Si la ronda es mayor a 1 y el oro es mayor a 120, se aumenta el ratio UPRG en  1 por cada 1000 de oro, hasta un máximo de 1
+      UPRG_RATIO += Math.min(gameGold / 1000, 1);  // Ademas se aumenta el ratio UPRG en 0.1 por cada 10 ronda (apartir de la 30), hasta un máximo de 1.5
       if (gameRound in roundMap) {
         UPRG_RATIO += roundMap[gameRound];
       } else if (gameRound > 70) {
         UPRG_RATIO += roundMap[70];
       }
-    } else if (gameRound < 1) {
+    } else if (gameRound < 1) {  // La ronda 0 es una ronda especial, donde se genera una horda de enemigos con un ratio UPRG de 0.85, ya que es la primera ronda del juego
       UPRG_RATIO = 0.85;
-    } else {
+    } else {                     // Se aumenta el ratio UPRG en 0.1 por cada 10 ronda (apartir de la 30), hasta un máximo de 1.5
       if (gameRound in roundMap) {
         UPRG_RATIO += roundMap[gameRound];
       } else if (gameRound > 70) {
@@ -146,12 +146,12 @@ const generateHorde = async (req, res) => {
     gameRound++;
 
 
-    // Función fitness
+    // Función fitness, dada una horda, calcula su "aptitud" en base a la salud total, daño total y el ratio UPRG
    function fitness(horde) {
       for (let i = 0; i < horde.length; i++) {
         horde[i].spawnTime = i * spacingTime;
       }
-      if (isHardMode) {
+      if (isHardMode) {                // Dependiendo del modo de juego, usamos una función diferente para simular los hits
         simulateHitsStepwise(horde, towerZones, fullPath);
       } else {
         simulateHits(horde, towerZones, fullPath);
@@ -164,7 +164,7 @@ const generateHorde = async (req, res) => {
 
       let totalDamage = 0;
       let maxEndTime  = 0;
-      for (let i = 0; i < horde.length; i++) {
+      for (let i = 0; i < horde.length; i++) {  // Para cada enemigo en la horda, calculamos el daño total que recibiría
         const e = horde[i];
 
         const travelTime = fullPath.length / e.speed + e.spawnTime;
@@ -177,21 +177,21 @@ const generateHorde = async (req, res) => {
           const multE = getDamageMultiplier(e.name, tw.name);
           dmg += tw.damage * e.hits[pos] * multE;
         }
-        totalDamage += Math.min(dmg, e.health);
+        totalDamage += Math.min(dmg, e.health);   // Así evitamos desfases en la salud total que infligen las torres
       }
 
-      if (totalDamage < totalHealth * UPRG_RATIO) {
+      if (totalDamage < totalHealth * UPRG_RATIO) {  // Si el daño total es menor que la salud total multiplicada por el ratio UPRG, devolvemos un valor muy negativo
         return -Infinity;
       }
 
-      const diff = Math.abs(totalHealth - totalDamage * UPRG_RATIO);
+      const diff = Math.abs(totalHealth - totalDamage * UPRG_RATIO);    // Calculamos la diferencia entre la salud total y el daño total ajustado por el ratio UPRG
 
-      const dps = totalDamage / maxEndTime;
+      const dps = totalDamage / maxEndTime;      
 
-      const wDiff = 1000;
-      const wDps  = 1;
+      const wDiff = 1000;   // Penalizamos mucho la diferencia entre salud y daño ajustado
+      const wDps  = 1;      // Penalizamos menos el daño por segundo
 
-      return -wDiff * diff + wDps * dps;
+      return -wDiff * diff + wDps * dps;  // Buscamos maximizar el DPS y minimizar la diferencia entre salud y daño ajustado
     }
 
 
@@ -343,18 +343,18 @@ function interpolatePath(path, step = 1) {
 
 
 function simulateHits(horde, towerZones, fullPath) {
-    horde.forEach(e => {
+    horde.forEach(e => {                   // Añadimos a los enemigos los hits, la salud restante y el estado de muerte
             e.hits = {};
             e.healthRemaining = e.health;
             e.isDead = false;
           });;
 
-      const events = [];
+      const events = [];    /// Array para almacenar los eventos de disparo de las torres
 
-      for (const tower of towerZones) {
+      for (const tower of towerZones) {       // Registramos los eventos de disparo de las torres
         let t = 0;
-        const maxT = Math.max(...horde.map(e => fullPath.length / e.speed + e.spawnTime));
-        while (t <= maxT) {
+        const maxT = Math.max(...horde.map(e => fullPath.length / e.speed + e.spawnTime));  // Tiempo máximo hasta que el último enemigo llegue al final del camino
+        while (t <= maxT) {                   // Mientras el último enemigo no haya llegado al final del camino
           events.push({ time: t, type: 'fire', tower });
           t += tower.fire_rate;
         }
@@ -363,30 +363,29 @@ function simulateHits(horde, towerZones, fullPath) {
       events.sort((a, b) => a.time - b.time);
 
       for (const event of events) {
-        if (event.type !== 'fire') continue;
 
         const { time, tower } = event;
 
         const target = horde.find(e => {
-          if (e.healthRemaining <= 0 || e.spawnTime > time) return false;
+          if (e.healthRemaining <= 0 || e.spawnTime > time) return false;     // Si el enemigo ya está muerto o no ha aparecido aún, lo ignoramos
           const dist = (time - e.spawnTime) * e.speed;
-          if (dist >= fullPath.length) return false;
+          if (dist >= fullPath.length) return false;                          // Si el enemigo ha llegado al final del camino, lo ignoramos
 
-          const idx = Math.min(Math.ceil(dist), fullPath.length - 1);
+          const idx = Math.min(Math.ceil(dist), fullPath.length - 1);    
           const pt = fullPath[idx];
-          const d2 = Math.hypot(pt.x - tower.x, pt.y - tower.y);
-          if (tower.name === 'mortar' && ['oculom', 'hellBat'].includes(e.name)) return false;
+          const d2 = Math.hypot(pt.x - tower.x, pt.y - tower.y);              // Calculamos la distancia entre la torre y el enemigo
+          if (tower.name === 'mortar' && ['oculom', 'hellBat'].includes(e.name)) return false;  // Si la torre es un mortero y el enemigo es volador, lo ignoramos
 
-          return d2 <= tower.range;
+          return d2 <= tower.range;                                           // Si la distancia es menor o igual al rango de la torre, el enemigo es un objetivo válido
         });
 
         if (!target) continue;
 
-        const mult = getDamageMultiplier(target.name, tower.name);
+        const mult = getDamageMultiplier(target.name, tower.name);            // Usamos la función auxiliar getDamageMultiplier para obtener el multiplicador de daño
         const dmg = tower.damage * mult;
 
-        target.hits[tower.position] = (target.hits[tower.position] || 0) + 1;
-        target.healthRemaining -= dmg;
+        target.hits[tower.position] = (target.hits[tower.position] || 0) + 1; // Registramos el hit de la torre al enemigo
+        target.healthRemaining -= dmg;                             
         if (target.healthRemaining <= 0) {
           target.healthRemaining = 0;
           target.isDead = true;
@@ -395,63 +394,62 @@ function simulateHits(horde, towerZones, fullPath) {
     }
 
 function simulateHitsStepwise(horde, towerZones, fullPath) {
-  horde.forEach(enemy => {
-    enemy.hits = {};
-    enemy.healthRemaining = enemy.health;
-    enemy.isDead = false;
-  });
 
-  towerZones.forEach(tower => {
-    const maxT = Math.max(
-      ...horde.map(e => fullPath.length / e.speed + e.spawnTime)
-    );
+    horde.forEach(enemy => {                  // Al igual que en simulateHits, añadimos a los enemigos los hits, la salud restante y el estado de muerte
+      enemy.hits = {};
+      enemy.healthRemaining = enemy.health;
+      enemy.isDead = false;
+    });
 
-    let nextFire = 0;
+    towerZones.forEach(tower => {               
+      const maxT = Math.max(
+        ...horde.map(e => fullPath.length / e.speed + e.spawnTime)
+      );
 
-    for (let t = 0.0; t <= maxT; t += 0.1) {
-      if (t < nextFire) continue;
+      let nextFire = 0;
 
-    const enemiesInRange = horde
-  .filter(e => {
-    if (e.healthRemaining <= 0 || e.spawnTime > t) return false;
+      for (let t = 0.0; t <= maxT; t += 0.1) {   // Se define un step de 0.1 segundos para simular el tiempo
+        if (t < nextFire) continue;              // Si aún no es el momento de disparar, continuamos al siguiente paso
 
-    const dist = (t - e.spawnTime) * e.speed;
-    if (dist >= fullPath.length) return false;
+        const enemiesInRange = horde.filter(e => {
+          if (e.healthRemaining <= 0 || e.spawnTime > t) return false;   // Si el enemigo ya está muerto o no ha aparecido aún, lo ignoramos
 
-    const index = Math.min(Math.ceil(dist), fullPath.length - 1);
-    const point = fullPath[index];
-    const dx = point.x - tower.x;
-    const dy = point.y - tower.y;
-    const d = Math.hypot(dx, dy);
+          const dist = (t - e.spawnTime) * e.speed;
+          if (dist >= fullPath.length) return false;                     // Si el enemigo ha llegado al final del camino, lo ignoramos
 
-    const isFlying = ['oculom', 'hellBat'].includes(e.name);
-    if (tower.name === 'mortar' && isFlying) return false;
+          const index = Math.min(Math.ceil(dist), fullPath.length - 1);
+          const point = fullPath[index];
+          const dx = point.x - tower.x;
+          const dy = point.y - tower.y;
+          const d = Math.hypot(dx, dy);                                  // Calculamos la distancia entre la torre y el enemigo        
 
-    return d <= tower.range;
-  })
-  .map(e => ({
-    enemy: e,
-    distanceTraveled: (t - e.spawnTime) * e.speed
-  }))
-  .sort((a, b) => b.distanceTraveled - a.distanceTraveled); 
+          const isFlying = ['oculom', 'hellBat'].includes(e.name);
+          if (tower.name === 'mortar' && isFlying) return false;
 
-const target = enemiesInRange.length > 0 ? enemiesInRange[0].enemy : null;
+          return d <= tower.range;                                      // Si la distancia es menor o igual al rango de la torre, el enemigo es un target válido
+        }).map(e => ({
+          enemy: e,
+          distanceTraveled: (t - e.spawnTime) * e.speed
+        }))
+        .sort((a, b) => b.distanceTraveled - a.distanceTraveled); 
 
-      if (target) {
-        target.hits[tower.position] = (target.hits[tower.position] || 0) + 1;
+        const target = enemiesInRange.length > 0 ? enemiesInRange[0].enemy : null;
 
-        const mult = getDamageMultiplier(target.name, tower.name);
-        const realDamage = tower.damage * mult;
-        target.healthRemaining -= realDamage;
+        if (target) {                                                    // Si hay un target válido, procedemos a calcular el daño
+          target.hits[tower.position] = (target.hits[tower.position] || 0) + 1; 
 
-        if (target.healthRemaining <= 0) {
-          target.healthRemaining = 0;
-          target.isDead = true;
+          const mult = getDamageMultiplier(target.name, tower.name);
+          const realDamage = tower.damage * mult;
+          target.healthRemaining -= realDamage;
+
+          if (target.healthRemaining <= 0) {
+            target.healthRemaining = 0;
+            target.isDead = true;
+          }
+
+          nextFire = t + tower.fire_rate;                              // Actualizamos el tiempo del próximo disparo de la torre (segun la cadencia)
         }
-
-        nextFire = t + tower.fire_rate;
       }
-    }
   });
 }
 

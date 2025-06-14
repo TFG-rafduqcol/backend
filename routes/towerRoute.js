@@ -12,6 +12,8 @@ const authenticateToken = require('../middlewares/authMiddleware');
  *       - Tower
  *     summary: Deploy a tower in a game session
  *     description: Deploys a new tower with the given properties (name, position) into a specific game session.
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -118,6 +120,8 @@ router.post('/deployTower', authenticateToken, deployTower);
  *       - Tower    
  *     summary: Upgrade a tower in a game session
  *     description: Upgrades a tower by applying the corresponding upgrade and boosting its stats (damage, range) based on the tower's level.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: towerId
@@ -207,6 +211,8 @@ router.put('/upgradeTower/:towerId', authenticateToken, upgradeTower);
  *       - Tower
  *     summary: Delete a tower from a game session
  *     description: Removes a tower from the game, refunding 50% of its cost back to the game balance.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: towerId

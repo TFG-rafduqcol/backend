@@ -12,6 +12,8 @@ const router = express.Router();
  *       - Admin
  *     summary: Check if current user is admin
  *     description: Returns a boolean indicating whether the authenticated user is an administrator.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Admin status retrieved successfully.
@@ -38,6 +40,8 @@ router.get('/isAdmin', authenticateToken, isAdmin);
  *       - Admin
  *     summary: Retrieve all users
  *     description: Returns a list of all users. Only accessible by administrators.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of users retrieved successfully.
@@ -63,6 +67,8 @@ router.get('/getAllUsers', authenticateToken, getAllUsers);
  *       - Admin
  *     summary: Register a new user
  *     description: Registers a new user in the system. Only accessible by administrators.
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:

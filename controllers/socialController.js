@@ -147,7 +147,12 @@ const getMyFriends = async (req, res) => {
                       model: Avatar,
                       as: 'active_avatar',
                       attributes: ['image_url']
-                  }]
+                  }, 
+                    {
+                        model: Range,
+                        as: 'range',
+                        attributes: ['name', 'image_url']
+                    }]
               },
               {
                   model: User,
@@ -157,7 +162,12 @@ const getMyFriends = async (req, res) => {
                       model: Avatar,
                       as: 'active_avatar',
                       attributes: ['image_url']
-                  }]
+                  }, 
+                    {
+                        model: Range,
+                        as: 'range',
+                        attributes: ['name', 'image_url']
+                    }]
               }
           ],
       });

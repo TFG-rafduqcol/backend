@@ -13,6 +13,8 @@ const router = express.Router();
  *       - Social
  *     summary: Get user by username or ID
  *     description: Fetch a user using their username or ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: usernameOrId
@@ -71,6 +73,8 @@ router.get('/getUserById/:userId', authenticateToken, getUserById);
  *       - Social
  *     summary: Get friends of the logged-in user
  *     description: Fetch all friends of the logged-in user
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of friends found
@@ -92,6 +96,8 @@ router.get('/getMyFriends', authenticateToken, getMyFriends);
  *       - Social
  *     summary: Get friend requests of the logged-in user
  *     description: Fetch all friend requests for the logged-in user
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of friend requests found
@@ -113,6 +119,8 @@ router.get('/getMyFriendRequests', authenticateToken, getMyFriendRequests);
  *       - Social
  *     summary: Send a friend request
  *     description: Send a friend request to a user by their user ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -142,6 +150,8 @@ router.post('/sendFriendRequest/:userId', authenticateToken, sendFriendRequest);
  *       - Social
  *     summary: Change the status of a friend request
  *     description: Accept or reject a friend request from a user by their user ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -183,6 +193,8 @@ router.post('/changeFriendRequestStatus/:userId', authenticateToken, changeFrien
  *       - Social
  *     summary: Remove a friend
  *     description: Remove a user from your friend list by their user ID
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId

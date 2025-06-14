@@ -11,6 +11,8 @@ const authenticateToken = require("../middlewares/authMiddleware");
  *    - Avatar
  *   summary: Get all avatars of the logged user
  *   description: Get all avatars of the logged user
+ *   security:
+ *     - bearerAuth: []
  *   responses:
  *    200:
  *     description: Avatars retrieved successfully
@@ -32,6 +34,8 @@ router.get('/getMyAvatars', authenticateToken, getMyAvatars);
  *    - Avatar
  *   summary: Change the active avatar of the logged user
  *   description: Change the active avatar of the logged user by providing the avatar ID.
+ *   security:
+ *     - bearerAuth: []
  *   parameters:
  *    - name: avatarId
  *      in: path
@@ -59,6 +63,8 @@ router.put('/changeMyActiveAvatar/:avatarId', authenticateToken, changeMyActiveA
  *    - Avatar
  *   summary: Purchase an avatar
  *   description: Allows a logged-in user to purchase an avatar by its ID if they have enough gems.
+ *   security:
+ *     - bearerAuth: []
  *   parameters:
  *    - name: avatarId
  *      in: path

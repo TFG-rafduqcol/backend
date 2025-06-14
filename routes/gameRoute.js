@@ -12,6 +12,8 @@ const authenticateToken = require('../middlewares/authMiddleware');
  *       - Game
  *     summary: Create a new game session
  *     description: Creates a new game session with the provided map, path, and user ID.
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -64,6 +66,8 @@ router.post('/createGame', authenticateToken, createGame);
  *       - Game
  *     summary: Retrieve a game session by ID
  *     description: Fetches the details of a specific game session by its unique ID. The session must belong to the authenticated user.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: gameId
@@ -111,6 +115,8 @@ router.get('/getGame/:gameId', authenticateToken, getGameById);
  *       - Game
  *     summary: Update a game's round, gold, and lives by ID
  *     description: Updates the round, gold, and lives of a specific game session. The session must belong to the authenticated user.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: gameId
@@ -184,6 +190,8 @@ router.put('/updateGame/:gameId', authenticateToken, updateGame);
  *       - Game
  *     summary: Finaliza una partida y procesa las recompensas
  *     description: Marca una partida como finalizada, actualiza estadísticas del usuario y rango si corresponde. Solo se puede finalizar si las vidas del juego son 0 o menos.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: gameId

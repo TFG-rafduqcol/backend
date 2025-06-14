@@ -11,9 +11,8 @@ const router = express.Router();
  *     tags:
  *       - Auth
  *     summary: Check if an email is already registered
- *     description: Verifies if the provided email is already registered in the system.
- *     security:
- *       - BearerAuth: []
+ *     description: Verifies if the provided email is already registered in the system. *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -128,9 +127,10 @@ router.post('/login', loginUser);
  * /api/auth/update/{id}:
  *   put:
  *     tags:
- *       - Auth
- *     summary: Update user information
+ *       - Auth *     summary: Update user information
  *     description: Allows a user to update their information (email, password, etc.) using their user ID.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -173,11 +173,8 @@ router.post('/login', loginUser);
  *       404:
  *         description: User not found
  *       401: 
- *         description: Unauthorized access - Token missing or invalid
- *       500:
+ *         description: Unauthorized access - Token missing or invalid *       500:
  *         description: Server error
- *       security:
- *       - bearerAuth: []  # Aquí indicamos que se necesita el token para este endpoint
  */
 router.put('/update/:id', authenticateToken, updateUser);
 
@@ -189,6 +186,8 @@ router.put('/update/:id', authenticateToken, updateUser);
  *       - Auth
  *     summary: Get user statistics
  *     description: Retrieves the statistics of a user by their ID.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
