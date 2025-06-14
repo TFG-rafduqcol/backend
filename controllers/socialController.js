@@ -179,6 +179,7 @@ const getMyFriends = async (req, res) => {
               id: user.id,
               username: user.username,
               avatar: user.active_avatar?.image_url || null,
+              range: user.range?.name || null,
               level: user.level
             } : null;
       }).filter(friend => friend !== null);
