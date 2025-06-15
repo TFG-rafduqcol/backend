@@ -31,7 +31,7 @@ const Enemy = sequelize.define(
             allowNull: false,
             validate: {
                 min: 0,
-                max: 10,
+                max: 60,
             },
         },
         lifes : {
@@ -49,9 +49,6 @@ const Enemy = sequelize.define(
                 min: 0,
                 max: 100,
             },
-        },
-        avatar: {
-            type: DataTypes.JSON,
         },
     },
     {
