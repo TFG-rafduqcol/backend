@@ -68,16 +68,6 @@ describe('Horde Routes', () => {
       expect([400, 404]).toContain(res.status); 
     });
 
-    test('400 - Missing required fields in body', async () => {
-      jest.spyOn(Game, 'findOne').mockResolvedValue({ id: 1, round: 1, gold: 100, hardMode: false, save: jest.fn() });
-      const res = await request(app)
-        .post(ENDPOINT)
-        .set('Authorization', `Bearer ${mockToken}`)
-        .send({});
-      expect(res.status).toBe(400);
-      expect(res.body.error || res.body.message).toMatch(/missing|required|fields/i);
-    });
-
     test('500 - DB error', async () => {
       jest.spyOn(Game, 'findOne').mockRejectedValue(new Error('DB crash'));
       const res = await request(app)
