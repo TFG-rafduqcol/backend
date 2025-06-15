@@ -3,7 +3,7 @@ const User = require("../models/user");
 const FriendShip = require("../models/friendShip");
 const Game = require("../models/game");
 const { Op } = require("sequelize");
-
+const Stats = require("../models/stats");
 
 const isAdmin = async (req, res) => {
     const transaction = await sequelize.transaction();
