@@ -10,9 +10,7 @@ const router = express.Router();
  *   post:
  *     tags:
  *       - Auth
- *     summary: Check if an email is already registered
- *     description: Verifies if the provided email is already registered in the system. *     security:
- *       - bearerAuth: []
+ *     summary: Check if an email is already registered *     description: Verifies if the provided email is already registered in the system.
  *     requestBody:
  *       required: true
  *       content:
@@ -40,10 +38,7 @@ router.post('/checkEmail', checkEmail);
  *   post:
  *     tags:
  *       - Auth
- *     summary: Register a new user
- *     description: Registers a new user with the provided information (first name, last name, email, password, etc.).
- *     security:
- *      - BearerAuth: []
+ *     summary: Register a new user *     description: Registers a new user with the provided information (first name, last name, email, password, etc.).]
  *     requestBody:
  *       required: true
  *       content:
@@ -87,10 +82,7 @@ router.post('/register', registerPlayer);
  *   post:
  *     tags:
  *       - Auth
- *     summary: User login
- *     description: Logs in a user using their credentials (email and password).
- *     security:
- *      - BearerAuth: []
+ *     summary: User login *     description: Logs in a user using their credentials (email and password).
  *     requestBody:
  *       required: true
  *       content:
@@ -127,7 +119,8 @@ router.post('/login', loginUser);
  * /api/auth/update/{id}:
  *   put:
  *     tags:
- *       - Auth *     summary: Update user information
+ *       - Auth
+ *     summary: Update user information
  *     description: Allows a user to update their information (email, password, etc.) using their user ID.
  *     security:
  *       - bearerAuth: []
@@ -173,7 +166,8 @@ router.post('/login', loginUser);
  *       404:
  *         description: User not found
  *       401: 
- *         description: Unauthorized access - Token missing or invalid *       500:
+ *         description: Unauthorized access - Token missing or invalid
+ *       500:
  *         description: Server error
  */
 router.put('/update/:id', authenticateToken, updateUser);
