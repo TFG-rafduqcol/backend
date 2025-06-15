@@ -208,6 +208,8 @@ describe('GET /api/social/getMyFriends', () => {
       id: 2,
       username: 'friend_user',
       avatar: 'https://example.com/friend_avatar.jpg',
+      range: null,
+      range_url: null
     });
   });
 

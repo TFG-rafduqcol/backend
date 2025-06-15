@@ -14,6 +14,11 @@ const hordeQualityLog = require('../models/hordeQualityLog');
 const generateHorde = async (req, res) => {
   const { gameId } = req.params;
   const { earnedGold, lostedLives, enemiesKilled } = req.body;  
+
+  if (!earnedGold || !lostedLives || !enemiesKilled) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
   const spacingTime   = 1.5;  // segundos entre enemigos
   const MAX_HORDE_SIZE = 20;
   const POPULATION_SIZE = 30;

@@ -74,6 +74,20 @@ describe('Tower Routes', () => {
       expect(res.body.error).toMatch(/invalid tower name/i);
     });
 
+    test('400 if not enough gold to deploy tower', async () => {
+      jest.spyOn(Game, 'findOne').mockResolvedValue({ id: 1, userId: 1, gold: 0, save: jest.fn() });
+      jest.spyOn(Tower, 'findOne').mockResolvedValueOnce(null);
+      jest.spyOn(Projectile, 'findOne').mockResolvedValue({ id: 1 });
+      const transaction = { LOCK: { UPDATE: 'UPDATE' }, commit: jest.fn(), rollback: jest.fn() };
+      jest.spyOn(sequelize, 'transaction').mockResolvedValue(transaction);
+      const res = await request(app)
+        .post(ENDPOINT)
+        .set('Authorization', `Bearer ${mockToken}`)
+        .send(payload);
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/not enough gold/i);
+    });
+
     test('401 if token is missing', async () => {
       const res = await authorizedRequestWithOutToken(ENDPOINT, 'post', payload);
       expect(res.status).toBe(401);
