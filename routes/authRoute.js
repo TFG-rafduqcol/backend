@@ -10,7 +10,8 @@ const router = express.Router();
  *   post:
  *     tags:
  *       - Auth
- *     summary: Check if an email is already registered *     description: Verifies if the provided email is already registered in the system.
+ *     summary: Check if an email is already registered
+ *     description: Verifies if the provided email is already registered in the system.
  *     requestBody:
  *       required: true
  *       content:
@@ -38,7 +39,8 @@ router.post('/checkEmail', checkEmail);
  *   post:
  *     tags:
  *       - Auth
- *     summary: Register a new user *     description: Registers a new user with the provided information (first name, last name, email, password, etc.).]
+ *     summary: Register a new user
+ *     description: Registers a new user with the provided information (first name, last name, email, password, etc.).
  *     requestBody:
  *       required: true
  *       content:
@@ -82,7 +84,8 @@ router.post('/register', registerPlayer);
  *   post:
  *     tags:
  *       - Auth
- *     summary: User login *     description: Logs in a user using their credentials (email and password).
+ *     summary: User login
+ *     description: Logs in a user using their credentials (email and password).
  *     requestBody:
  *       required: true
  *       content:
