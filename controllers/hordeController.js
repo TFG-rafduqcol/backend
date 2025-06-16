@@ -119,7 +119,7 @@ const generateHorde = async (req, res) => {
         });
       }
 
-    let UPRG_RATIO = isHardMode? 1: 0.95; // La vida de los enemigos se ajusta al daño que las torres pueden infligir,
+    let UPRG_RATIO = 1;
     const roundMap = {  // Segun la ronda, se ajusta el ratio UPRG
       30: 0.1,
       40: 0.2,

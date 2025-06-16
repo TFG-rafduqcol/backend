@@ -215,11 +215,6 @@ const projectilesData = [
     { id: 3, name: 'fire', speed: 4 },
     { id: 4, name: 'rock',  speed: 4 },
 ];
-const towersData = [
-    { id: 1, name: 'stoneCannon', damage: 10, cost: 100, fire_rate: 3, range: 140, position: 1, gameId: 1, projectileId: 1 },
-    { id: 2, name: 'ironCannon', damage: 12, cost: 125, fire_rate: 0.8, range: 120, position: 5, gameId: 1, projectileId: 2 },
-    { id: 3, name: 'inferno', damage: 15, cost: 150, fire_rate: 0.3, range: 120, position: 6, gameId: 2, projectileId: 3 },
-];
 
 
 const enemiesData = [
