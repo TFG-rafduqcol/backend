@@ -50,7 +50,7 @@ const generateHorde = async (req, res) => {
    
     const game = await Game.findOne({ where: { id: gameId } });
     let gameRound = game.round;  
-    const gameGold = game.gold + earnedGold; 
+    const gameGold = game.gold; 
 
     if (gameRound > 0) {
 
@@ -119,7 +119,7 @@ const generateHorde = async (req, res) => {
         });
       }
 
-    let UPRG_RATIO = 1; // La vida de los enemigos se ajusta al daño que las torres pueden infligir,
+    let UPRG_RATIO = isHardMode? 1: 0.95; // La vida de los enemigos se ajusta al daño que las torres pueden infligir,
     const roundMap = {  // Segun la ronda, se ajusta el ratio UPRG
       30: 0.1,
       40: 0.2,
