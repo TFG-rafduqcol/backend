@@ -199,10 +199,6 @@ const UserAvatars = [
     { userId: 1, avatarId: 5 },
     { userId: 1, avatarId: 6 },
     { userId: 1, avatarId: 7 },
-    { userId: 1, avatarId: 8 },
-    { userId: 1, avatarId: 9 },
-    { userId: 1, avatarId: 10 },
-    { userId: 1, avatarId: 11 },
 
     { userId: 2, avatarId: 1 },
     { userId: 3, avatarId: 2 },
