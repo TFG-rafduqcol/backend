@@ -50,7 +50,7 @@ const generateHorde = async (req, res) => {
    
     const game = await Game.findOne({ where: { id: gameId } });
     let gameRound = game.round;  
-    const gameGold = game.gold; 
+    const gameGold = game.gold + earnedGold; 
 
     if (gameRound > 0) {
 
