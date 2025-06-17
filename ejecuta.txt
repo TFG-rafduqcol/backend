@@ -1,0 +1,5 @@
+El backend actualmente esta configurado para desplegarse en railway en la siguiente URI segura: https://backend-production-c59c.up.railway.app/
+
+Por lo que la configuración no admite la ejecución en local solo en railway.
+
+Si se quieren ejeutar los test: npm test
