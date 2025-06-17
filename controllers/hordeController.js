@@ -190,11 +190,11 @@ const generateHorde = async (req, res) => {
       const absDiff = Math.abs(diff);
       const dps = totalDamage / maxEndTime;      // Daño por segundo
 
-      const wDiff = 2000;   // Penalizamos mucho la diferencia si hay exceso de vida
+      const wDiff = 5000;   // Penalización aún más fuerte para exceso de vida
       const wDps  = 1;      // Penalizamos menos el daño por segundo
       let penalty = 0;
-      if (diff > 0) penalty = -wDiff * diff; // Penaliza mucho si hay exceso de vida
-      else penalty = -wDiff * absDiff * 0.2; // Penaliza poco si hay exceso de daño
+      if (diff > 0) penalty = -wDiff * diff * 2; // Penaliza muchísimo si hay exceso de vida
+      else penalty = -wDiff * absDiff * 0.1; // Penaliza muy poco si hay exceso de daño
       // Buscamos maximizar el DPS y minimizar la diferencia entre salud y daño ajustado
       return penalty + wDps * dps;
     }

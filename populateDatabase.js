@@ -224,7 +224,7 @@ const enemiesData = [
     { id: 4, name: 'devilOrc', health: 90, speed: 12, lifes: 1, gold: 15 },
     { id: 5, name: 'graySkull',  health: 140, speed: 8, lifes: 3, gold: 25 },
     { id: 6, name: 'carrionTropper',  health: 90, speed: 14, lifes: 2, gold: 2 },
-    { id: 7, name: 'hellBat',  health: 90, speed: 17, lifes: 2, gold: 15 },
+    { id: 7, name: 'hellBat',  health: 80, speed: 17, lifes: 2, gold: 15 },
     { id: 8, name: 'hexLord', health: 90, speed: 17, lifes: 4, gold: 20 },
     { id: 9, name: 'darkSeer',  health: 140, speed: 10, lifes: 5, gold: 30 },
 ];
