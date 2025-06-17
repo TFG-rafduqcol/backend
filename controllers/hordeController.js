@@ -148,6 +148,7 @@ const generateHorde = async (req, res) => {
 
 
     // Función fitness, dada una horda, calcula su "aptitud" en base a la salud total, daño total y el ratio UPRG
+    // Penaliza fuertemente las hordas con demasiada vida respecto al daño ajustado, y penaliza poco si hay exceso de daño
    function fitness(horde) {
       for (let i = 0; i < horde.length; i++) {
         horde[i].spawnTime = i * spacingTime;
@@ -167,10 +168,8 @@ const generateHorde = async (req, res) => {
       let maxEndTime  = 0;
       for (let i = 0; i < horde.length; i++) {  // Para cada enemigo en la horda, calculamos el daño total que recibiría
         const e = horde[i];
-
         const travelTime = fullPath.length / e.speed + e.spawnTime;
         if (travelTime > maxEndTime) maxEndTime = travelTime;
-
         let dmg = 0;
         for (const pos in e.hits) {
           const tw = towerZones.find(t => t.position === Number(pos));
@@ -181,18 +180,23 @@ const generateHorde = async (req, res) => {
         totalDamage += Math.min(dmg, e.health);   // Así evitamos desfases en la salud total que infligen las torres
       }
 
-      if (totalDamage < totalHealth * UPRG_RATIO) {  // Si el daño total es menor que la salud total multiplicada por el ratio UPRG, devolvemos un valor muy negativo
+      // Si el daño total es menor que la salud total multiplicada por el ratio UPRG, devolvemos un valor muy negativo
+      if (totalDamage < totalHealth * UPRG_RATIO) {
         return -Infinity;
       }
 
-      const diff = Math.abs(totalHealth - totalDamage * UPRG_RATIO);    // Calculamos la diferencia entre la salud total y el daño total ajustado por el ratio UPRG
+      // Calculamos la diferencia entre la salud total y el daño total ajustado por el ratio UPRG
+      const diff = totalHealth - totalDamage * UPRG_RATIO;
+      const absDiff = Math.abs(diff);
+      const dps = totalDamage / maxEndTime;      // Daño por segundo
 
-      const dps = totalDamage / maxEndTime;      
-
-      const wDiff = 1000;   // Penalizamos mucho la diferencia entre salud y daño ajustado
+      const wDiff = 2000;   // Penalizamos mucho la diferencia si hay exceso de vida
       const wDps  = 1;      // Penalizamos menos el daño por segundo
-
-      return -wDiff * diff + wDps * dps;  // Buscamos maximizar el DPS y minimizar la diferencia entre salud y daño ajustado
+      let penalty = 0;
+      if (diff > 0) penalty = -wDiff * diff; // Penaliza mucho si hay exceso de vida
+      else penalty = -wDiff * absDiff * 0.2; // Penaliza poco si hay exceso de daño
+      // Buscamos maximizar el DPS y minimizar la diferencia entre salud y daño ajustado
+      return penalty + wDps * dps;
     }
 
 
