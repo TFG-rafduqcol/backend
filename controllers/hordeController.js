@@ -121,15 +121,15 @@ const generateHorde = async (req, res) => {
 
     let UPRG_RATIO = 1;
     const roundMap = {  // Segun la ronda, se ajusta el ratio UPRG
-      30: 0.1,
-      40: 0.2,
-      50: 0.3,
-      60: 0.4,
-      70: 0.5,
+      30: 0.02,
+      40: 0.04,
+      50: 0.06,
+      60: 0.08,
+      70: 0.1,
     };
 
     if (gameRound > 1 && gameGold > 120) {   // Si la ronda es mayor a 1 y el oro es mayor a 120, se aumenta el ratio UPRG en  1 por cada 1000 de oro, hasta un máximo de 1
-      UPRG_RATIO += Math.min(gameGold / 1000, 1);  // Ademas se aumenta el ratio UPRG en 0.1 por cada 10 ronda (apartir de la 30), hasta un máximo de 1.5
+      UPRG_RATIO += Math.min(gameGold / 10000, 1);  // Ademas se aumenta el ratio UPRG en 0.1 por cada 10 ronda (apartir de la 30), hasta un máximo de 1.5
       if (gameRound in roundMap) {
         UPRG_RATIO += roundMap[gameRound];
       } else if (gameRound > 70) {
