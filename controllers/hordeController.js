@@ -128,8 +128,8 @@ const generateHorde = async (req, res) => {
       70: 0.1,
     };
 
-    if (gameRound > 1 && gameGold > 120) {   // Si la ronda es mayor a 1 y el oro es mayor a 120, se aumenta el ratio UPRG en  1 por cada 1000 de oro, hasta un máximo de 1
-      UPRG_RATIO += Math.min(gameGold / 10000, 1);  // Ademas se aumenta el ratio UPRG en 0.1 por cada 10 ronda (apartir de la 30), hasta un máximo de 1.5
+    if (gameRound > 1 && gameGold > 120) {   // Si la ronda es mayor a 1 y el oro es mayor a 120, se aumenta el ratio UPRG en  1 por cada 10000 de oro, hasta un máximo de 1
+      UPRG_RATIO += Math.min(gameGold / 10000, 1);  // Ademas se aumenta el ratio UPRG en 0.02 por cada 10 ronda (apartir de la 30), hasta un máximo de 1
       if (gameRound in roundMap) {
         UPRG_RATIO += roundMap[gameRound];
       } else if (gameRound > 70) {
@@ -137,7 +137,7 @@ const generateHorde = async (req, res) => {
       }
     } else if (gameRound < 1) {  // La ronda 0 es una ronda especial, donde se genera una horda de enemigos con un ratio UPRG de 0.85, ya que es la primera ronda del juego
       UPRG_RATIO = 0.85;
-    } else {                     // Se aumenta el ratio UPRG en 0.1 por cada 10 ronda (apartir de la 30), hasta un máximo de 1.5
+    } else {                     // Se aumenta el ratio UPRG en 0.02 por cada 10 ronda (apartir de la 30)
       if (gameRound in roundMap) {
         UPRG_RATIO += roundMap[gameRound];
       } else if (gameRound > 70) {
@@ -148,7 +148,6 @@ const generateHorde = async (req, res) => {
 
 
     // Función fitness, dada una horda, calcula su "aptitud" en base a la salud total, daño total y el ratio UPRG
-    // Penaliza fuertemente las hordas con demasiada vida respecto al daño ajustado, y penaliza poco si hay exceso de daño
    function fitness(horde) {
       for (let i = 0; i < horde.length; i++) {
         horde[i].spawnTime = i * spacingTime;
@@ -177,7 +176,7 @@ const generateHorde = async (req, res) => {
           const multE = getDamageMultiplier(e.name, tw.name);
           dmg += tw.damage * e.hits[pos] * multE;
         }
-        totalDamage += Math.min(dmg, e.health);   // Así evitamos desfases en la salud total que infligen las torres
+        totalDamage += Math.min(dmg, e.health);   // Así evitamos desfases en la salud total que infligen las torres (evita fallo de calculos)
       }
 
       // Si el daño total es menor que la salud total multiplicada por el ratio UPRG, devolvemos un valor muy negativo
